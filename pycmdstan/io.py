@@ -18,6 +18,8 @@ def _rdump_array(key, val):
 
 
 def rdump(fname, data):
+    """Dump a dict of data to a R dump format file.
+    """
     with open(fname, 'w') as fd:
         for key, val in data.items():
             if isinstance(val, np.ndarray) and val.size > 1:
