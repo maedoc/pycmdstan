@@ -13,11 +13,14 @@ def _find_cmdstan():
         raise CmdStanNotFound
 
 
-def preprocess_model(stan_fname, hpp_fname, overwrite=False):
+def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
+    hpp_fname = hpp_fname or stan_fname.replace('.stan', '.hpp')
     stanc_path = os.path.join(_find_cmdstan(), 'bin', 'stanc')
+    cmd = [stanc_path, f'--o={hpp_fname}', f'{stan_fname}']
+    cwd = os.path.abspath(os.path.dirname(stan_fname))
     subprocess.check_call(
-        [stanc_path, f'--o={hpp_fname}', f'{stan_fname}'],
-        cwd=os.path.dirname(stan_fname)
+        cmd,
+        cwd=cwd
     )
 
 # TODO wrap functions w/ ctypes

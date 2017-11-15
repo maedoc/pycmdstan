@@ -2,9 +2,10 @@
 
 import os
 import sys
+import time
 import subprocess
+import numpy as np
 
-__all__ = 'rdump parse_csv csv2init'.split()
 
 def _rdump_array(key, val):
     c = 'c(' + ', '.join(map(str, val.flat)) + ')'
@@ -34,8 +35,6 @@ def rdump(fname, data):
             fd.write('\n')
 
 
-
-
 def merge_csv_data(*csvs):
     data_ = {}
     for csv in csvs:
@@ -51,9 +50,12 @@ def merge_csv_data(*csvs):
 
 
 def parse_csv(fname):
+    if '*' in fname:
+        import glob
+        return parse_csv(glob.glob(fname))
     if isinstance(fname, (list, tuple)):
         return merge_csv_data(*[parse_csv(_) for _ in fname])
-    print('parsing %r' % (fname,))
+    
     lines = []
     with open(fname, 'r') as fd:
         for line in fd.readlines():
@@ -86,9 +88,51 @@ def parse_csv(fname):
 
     return data_
 
-
-def csv2init(csv_fname, init_fname):
-    # TODO test me, e.g. opt -> init advi/hmc
+def csv2mode(csv_fname, mode=None):
     csv = parse_csv(csv_fname)
-    data = {k: v[0] for k, v in csv.items() if k not in ('lp__', )}
-    c.rdump(init_fname, data)
+    data = {}
+    for key, val in csv.items():
+        if key.endswith('__'):
+            continue
+        if mode is None:
+            val_ = val[0]
+        elif mode == 'mean':
+            val_ = val.mean(axis=0)
+        elif mode[0] == 'p':
+            val_ = np.percentile(val, int(mode[1:]), axis=0)
+        data[key] = val_
+    return data
+
+def csv2r(csv_fname, r_fname=None, mode=None):
+    data = csv2mode(csv_fname, mode=mode)
+    r_fname = r_fname or csv_fname.replace('.csv', '.R')
+    rdump(r_fname, data)
+
+
+from threading import Thread
+class FollowCSV:
+    def __init__(self, csv_fname):
+        self.csv_fname = csv_fname
+        self.thread = Thread(target=self._run)
+        self.thread.start()
+        self._line = ''
+        self.read = True
+    @property
+    def line(self):
+        self.read = True
+        return self._line
+    def _run(self):
+        while True:
+            try:
+                self._follow()
+            except Exception as exc:
+                print(exc)
+    def _follow(self):
+        with open(self.csv_fname, 'r') as fd:
+            while True:
+                line = fd.readline()
+                if line:
+                    self._line = line
+                    self.read = False
+                else:
+                    time.sleep(0.2)
