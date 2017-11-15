@@ -4,6 +4,18 @@ Python interface to CmdStan.
 
 ## Install
 
+```
+pip install -e git+https://github.com/maedoc/pycmdstan
+```
+
+### Completion
+
+Bash only, but darn convenient
+```bash
+$ pycmdstan -- --completion > tmp && . tmp && rm tmp
+```
+Then, entering `pycmdstan pre<TAB>` should complete with `preprocess-model`.
+
 ## Use
 
  The main assumption is that
