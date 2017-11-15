@@ -92,14 +92,3 @@ def csv2init(csv_fname, init_fname):
     csv = parse_csv(csv_fname)
     data = {k: v[0] for k, v in csv.items() if k not in ('lp__', )}
     c.rdump(init_fname, data)
-
-
-def preprocess_model():
-    pass
-
-
-def compile_model():
-    pass
-
-
-# TODO wrap functions w/ ctypes
