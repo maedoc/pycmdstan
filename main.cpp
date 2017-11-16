@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/numpy.h>
 #include "foo.hpp"
 int add(int i, int j) {
     return i + j;
@@ -31,6 +32,8 @@ PYBIND11_MODULE(foo, m) {
       boost::ecuyer1988 rng = foo_functions::__create_rng(42);
       return foo_functions::stan_gamma_rng(n, a, b, rng, &std::cout);
     }, "call stan gamma rng");
+
+    // TODO http://pybind11.readthedocs.io/en/stable/advanced/pycpp/numpy.html#vectorizing-functions
 
     m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
         Subtract two numbers

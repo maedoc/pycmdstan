@@ -5,3 +5,5 @@ build
 *.egg-info
 .vscode
 var
+*.R
+*.exe

@@ -5,4 +5,8 @@ functions {
       x[i] = gamma_rng(a, b);
     return x;
   }
+
+  real[] stan_gamma_rng2(real a, real b) {
+    return gamma_rng(a, b);
+  }
 }
