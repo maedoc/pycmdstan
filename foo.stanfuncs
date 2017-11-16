@@ -1,0 +1,8 @@
+functions {
+  real[] stan_gamma_rng(int n, real a, real b) {
+    real x[n];
+    for (i in 1:n)
+      x[i] = gamma_rng(a, b);
+    return x;
+  }
+}
