@@ -2,4 +2,7 @@ functions {
   real stan_gamma_rng(real a, real b) {
     return gamma_rng(a, b);
   }
+  real stan_gamma_lpdf(real y, real a, real b) {
+    return gamma_lpdf(y | a, b);
+  }
 }

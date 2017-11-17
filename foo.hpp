@@ -22,7 +22,7 @@ typedef Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> matrix_d;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "unkown file name");
-    reader.add_event(5, 5, "end", "unkown file name");
+    reader.add_event(8, 8, "end", "unkown file name");
     return reader;
 }
 
@@ -59,11 +59,61 @@ struct stan_gamma_rng_functor__ {
     }
 };
 
+template <bool propto, typename T0__, typename T1__, typename T2__>
+typename boost::math::tools::promote_args<T0__, T1__, T2__>::type
+stan_gamma_lpdf(const T0__& y,
+                    const T1__& a,
+                    const T2__& b, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__, T1__, T2__>::type fun_scalar_t__;
+    typedef fun_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        fun_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+
+    int current_statement_begin__ = -1;
+    try {
+
+        current_statement_begin__ = 6;
+        return stan::math::promote_scalar<fun_return_scalar_t__>(gamma_log(y,a,b));
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+template <typename T0__, typename T1__, typename T2__>
+typename boost::math::tools::promote_args<T0__, T1__, T2__>::type
+stan_gamma_lpdf(const T0__& y,
+                    const T1__& a,
+                    const T2__& b, std::ostream* pstream__) {
+    return stan_gamma_lpdf<false>(y,a,b, pstream__);
+}
+
+
+struct stan_gamma_lpdf_functor__ {
+    template <bool propto, typename T0__, typename T1__, typename T2__>
+        typename boost::math::tools::promote_args<T0__, T1__, T2__>::type
+    operator()(const T0__& y,
+                    const T1__& a,
+                    const T2__& b, std::ostream* pstream__) const {
+        return stan_gamma_lpdf(y, a, b, pstream__);
+    }
+};
+
 // [[Rcpp::export]]
 double
 stan_gamma_rng(const double& a,
                    const double& b, boost::ecuyer1988& base_rng__, std::ostream* pstream__ = 0){
   return stan_gamma_rng<double, double, boost::ecuyer1988>(a, b, base_rng__, pstream__);
+}
+
+// [[Rcpp::export]]
+double
+stan_gamma_lpdf(const double& y,
+                    const double& a,
+                    const double& b, std::ostream* pstream__ = 0){
+  return stan_gamma_lpdf<false, double, double, double>(y, a, b, pstream__);
 }
 
  } 
