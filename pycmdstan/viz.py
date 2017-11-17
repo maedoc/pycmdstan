@@ -20,7 +20,7 @@ def plot_key(csv_fname, *keys):
 
 def hist_key(csv_fname, *keys):
     def _(x, **kwargs):
-        pl.hist(x, bins=int(sqrt(len(x))), **kwargs)
+        pl.hist(x.reshape((-1,)), bins=int(sqrt(len(x))), **kwargs)
     _plot_key(_, csv_fname, *keys)
 
 
