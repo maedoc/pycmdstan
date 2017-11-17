@@ -38,6 +38,21 @@ ext_modules = [
         ],
         language='c++'
     ),
+        Extension(
+            'allcall',
+            ['allcall.cpp'],
+            include_dirs=[
+                './',
+                # Path to pybind11 headers
+                get_pybind_include(),
+                get_pybind_include(user=True),
+                'cmdstan/stan/src',
+                'cmdstan/stan/lib/stan_math',
+                'cmdstan/stan/lib/stan_math/lib/eigen_3.3.3',
+                'cmdstan/stan/lib/stan_math/lib/cvodes_2.9.0/include'
+            ],
+            language='c++'
+        ),
 ]
 
 

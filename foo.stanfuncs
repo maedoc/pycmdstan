@@ -5,4 +5,5 @@ functions {
   real stan_gamma_lpdf(real y, real a, real b) {
     return gamma_lpdf(y | a, b);
   }
+#include "allcall.stan"
 }
