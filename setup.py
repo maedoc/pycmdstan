@@ -26,7 +26,7 @@ class get_pybind_include(object):
 ext_modules = [
     Extension(
         'foo',
-        ['main.cpp'],
+        ['foo.cpp'],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),

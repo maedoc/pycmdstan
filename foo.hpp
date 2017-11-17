@@ -22,16 +22,15 @@ typedef Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> matrix_d;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "unkown file name");
-    reader.add_event(8, 8, "end", "unkown file name");
+    reader.add_event(5, 5, "end", "unkown file name");
     return reader;
 }
 
-template <typename T1__, typename T2__, class RNG>
-std::vector<typename boost::math::tools::promote_args<T1__, T2__>::type>
-stan_gamma_rng(const int& n,
-                   const T1__& a,
-                   const T2__& b, RNG& base_rng__, std::ostream* pstream__) {
-    typedef typename boost::math::tools::promote_args<T1__, T2__>::type fun_scalar_t__;
+template <typename T0__, typename T1__, class RNG>
+typename boost::math::tools::promote_args<T0__, T1__>::type
+stan_gamma_rng(const T0__& a,
+                   const T1__& b, RNG& base_rng__, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__, T1__>::type fun_scalar_t__;
     typedef fun_scalar_t__ fun_return_scalar_t__;
     const static bool propto__ = true;
     (void) propto__;
@@ -40,22 +39,9 @@ stan_gamma_rng(const int& n,
 
     int current_statement_begin__ = -1;
     try {
-        {
+
         current_statement_begin__ = 3;
-        validate_non_negative_index("x", "n", n);
-        vector<fun_scalar_t__> x(n);
-        stan::math::initialize(x, std::numeric_limits<double>::quiet_NaN());
-        stan::math::fill(x,DUMMY_VAR__);
-
-
-        current_statement_begin__ = 4;
-        for (int i = 1; i <= n; ++i) {
-            current_statement_begin__ = 5;
-            stan::math::assign(get_base1_lhs(x,i,"x",1), gamma_rng(a,b, base_rng__));
-        }
-        current_statement_begin__ = 6;
-        return stan::math::promote_scalar<fun_return_scalar_t__>(x);
-        }
+        return stan::math::promote_scalar<fun_return_scalar_t__>(gamma_rng(a,b, base_rng__));
     } catch (const std::exception& e) {
         stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
         // Next line prevents compiler griping about no return
@@ -65,21 +51,19 @@ stan_gamma_rng(const int& n,
 
 
 struct stan_gamma_rng_functor__ {
-    template <typename T1__, typename T2__, class RNG>
-        std::vector<typename boost::math::tools::promote_args<T1__, T2__>::type>
-    operator()(const int& n,
-                   const T1__& a,
-                   const T2__& b, RNG& base_rng__, std::ostream* pstream__) const {
-        return stan_gamma_rng(n, a, b, base_rng__, pstream__);
+    template <typename T0__, typename T1__, class RNG>
+        typename boost::math::tools::promote_args<T0__, T1__>::type
+    operator()(const T0__& a,
+                   const T1__& b, RNG& base_rng__, std::ostream* pstream__) const {
+        return stan_gamma_rng(a, b, base_rng__, pstream__);
     }
 };
 
 // [[Rcpp::export]]
-std::vector<double>
-stan_gamma_rng(const int& n,
-                   const double& a,
+double
+stan_gamma_rng(const double& a,
                    const double& b, boost::ecuyer1988& base_rng__, std::ostream* pstream__ = 0){
-  return stan_gamma_rng<double, double, boost::ecuyer1988>(n, a, b, base_rng__, pstream__);
+  return stan_gamma_rng<double, double, boost::ecuyer1988>(a, b, base_rng__, pstream__);
 }
 
  } 
