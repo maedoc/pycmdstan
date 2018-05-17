@@ -1,0 +1,6 @@
+build:
+  tags:
+  - docker
+  script:
+    - docker info
+    - docker build -t pycmdstan .
