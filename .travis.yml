@@ -3,11 +3,13 @@ language: python
 python:
   - "3.6"
 
+cache:
+  directories:
+  - cmdstan-*
+
 install:
   - pip install numpy
-  - curl -OL https://github.com/stan-dev/cmdstan/releases/download/v2.17.1/cmdstan-2.17.1.tar.gz
-  - tar xzf cmdstan-2.17.1.tar.gz
-  - cd cmdstan* && make CC=g++ build
+  - if [[ ! -d cmdstan ]]; then curl -OL https://github.com/stan-dev/cmdstan/releases/download/v2.17.1/cmdstan-2.17.1.tar.gz && tar xzf cmdstan-*.tar.gz && rm -rf cmdstan-*.tar.gz && mv cmdstan-* cmdstan && cd cmdstan-* && make CC=g++ build; fi
 
 script:
   - python -c 'print(42)'
