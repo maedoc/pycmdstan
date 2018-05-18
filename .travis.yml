@@ -5,11 +5,11 @@ python:
 
 cache:
   directories:
-  - cmdstan-*
+  - cmdstan-2.17.1
 
 install:
   - pip install numpy
-  - if [[ ! -d cmdstan ]]; then curl -OL https://github.com/stan-dev/cmdstan/releases/download/v2.17.1/cmdstan-2.17.1.tar.gz && tar xzf cmdstan-*.tar.gz && rm -rf cmdstan-*.tar.gz && mv cmdstan-* cmdstan && cd cmdstan-* && make CC=g++ build; fi
+  - if [[ ! -d cmdstan-2.17.1 ]]; then curl -OL https://github.com/stan-dev/cmdstan/releases/download/v2.17.1/cmdstan-2.17.1.tar.gz && tar xzf cmdstan-2.17.1.tar.gz && rm -rf cmdstan-2.17.1.tar.gz && cd cmdstan-2.17.1 && make CC=g++ build; fi
 
 script:
   - python -c 'print(42)'
