@@ -16,4 +16,4 @@ install:
 
 script:
   - python -c 'print(42)'
-  - cd cmdstan-$CSVER && make CC=g++ examples/bernoulli/bernoulli
+  - cd cmdstan-$CSVER && ls && ls examples/* && make CC=g++ examples/bernoulli/bernoulli
