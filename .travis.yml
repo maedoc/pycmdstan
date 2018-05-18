@@ -1,0 +1,4 @@
+language: python
+
+install:
+  - python -c 'print(42)'
