@@ -12,7 +12,7 @@ cache:
 
 install:
   - pip install numpy
-  - if [[ ! -d cmdstan-$CSVER ]]; then curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdstan-$CSVER.tar.gz && tar xzf cmdstan-$CSVER.tar.gz && rm -rf cmdstan-$CSVER.tar.gz && cd cmdstan-$CSVER && make CC=g++ build; fi
+  - if [[ ! -f cmdstan-$CSVER/bin/stanc ]]; then curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdstan-$CSVER.tar.gz && tar xzf cmdstan-$CSVER.tar.gz && rm -rf cmdstan-$CSVER.tar.gz && cd cmdstan-$CSVER && make CC=g++ build; fi
 
 script:
   - python -c 'print(42)'
