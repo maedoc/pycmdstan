@@ -182,38 +182,6 @@ def csv2r(csv_fname, r_fname=None, mode=None):
     rdump(r_fname, data)
 
 
-class CmdStanNotFound(Exception): pass
-
-
-def cmdstan_path(path=''):
-    if path:
-        path = os.path.expanduser(os.path.expandvars(path))
-        os.environ['CMDSTAN'] = path
-    path = os.environ.get('CMDSTAN', 'cmdstan')
-    if not os.path.exists(os.path.join(path, 'runCmdStanTests.py')):
-        raise CmdStanNotFound(
-            'please provide CmdStan path, e.g. lib.cmdstan_path("/path/to/")')
-    return path
-
-
-def compile_model(stan_fname, cc='clang++'):
-    path = os.path.abspath(os.path.dirname(stan_fname))
-    name = stan_fname[:-5]
-    target = os.path.join(path, name)
-    proc = subprocess.Popen(
-        ['make', target, f'CC={cc}'],
-        cwd=cmdstan_path(),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    stdout = proc.stdout.read().decode('ascii').strip()
-    if stdout:
-        print(stdout)
-    stderr = proc.stderr.read().decode('ascii').strip()
-    if stderr:
-        print(stderr)
-
-
 # TODO class to run modules instead of %%bash in ipynb
 
 
