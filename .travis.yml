@@ -2,6 +2,7 @@ language: python
 
 env:
   CSVER=2.17.1
+  CMDSTAN=cmdstan-2.17.1
 
 python:
   - "3.6"
