@@ -1,6 +1,6 @@
 # pycmdstan
 
-[![Build Status](https://travis-ci.org/maedoc/pycmdstan.svg?branch=master)](https://travis-ci.org/maedoc/pycmdstan)
+[![Build Status](https://travis-ci.org/maedoc/pycmdstan.svg?branch=master)](https://travis-ci.org/maedoc/pycmdstan) [![Coverage Status](https://coveralls.io/repos/github/maedoc/pycmdstan/badge.svg?branch=master)](https://coveralls.io/github/maedoc/pycmdstan?branch=master)
 
 Python interface to CmdStan.
 

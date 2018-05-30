@@ -23,11 +23,16 @@ class SimpleIOTests(BaseTestCase):
     def test_write_read(self):
         data = {
             'int': 3,
-            'real': 2.3
+            'real': 2.3,
+            'mat': np.random.randn(4, 4)
         }
         fname = self.tmp_fname('write_read.R')
         io.rdump(fname, data)
         data_ = io.rload(fname)
         for key, val in data.items():
             val_ = data_[key]
-            self.assertEqual(val, val_)
+            if key in 'int real'.split():
+                self.assertEqual(val, val_)
+            else:
+                self.assertTrue(
+                    np.allclose(val, val_))
