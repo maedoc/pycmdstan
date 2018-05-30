@@ -1,5 +1,0 @@
-#!/usr/bin/env python
-
-from pycmdstan import *
-import fire
-fire.Fire()
