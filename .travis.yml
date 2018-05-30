@@ -1,0 +1,18 @@
+language: python
+
+env:
+  CSVER=2.17.1
+
+python:
+  - "3.6"
+
+cache:
+  directories:
+  - cmdstan-2.17.1
+
+install:
+  - pip install numpy
+  - if [[ ! -f cmdstan-$CSVER/bin/stanc ]]; then curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdstan-$CSVER.tar.gz && tar xzf cmdstan-$CSVER.tar.gz && rm -rf cmdstan-$CSVER.tar.gz && cd cmdstan-$CSVER && make CC=g++ build examples/bernoulli/bernoulli; fi
+
+script:
+  - python -c 'print(42)'
