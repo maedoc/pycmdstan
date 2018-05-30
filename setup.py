@@ -3,11 +3,10 @@
 from distutils.core import setup
 
 setup(name='pycmdstan',
-      version='0.0',
+      version='0.1',
       description='Python interface to CmdStan',
       author='Marmaduke Woodman',
       author_email='marmaduke.woodman@univ-amu.fr',
-      url='https://github.com/maedoc/pycmdstan/',
-      packages=['pycmdstan'],
-      scripts=['bin/pycmdstan']
-     )
+      url='https://github.com/maedoc/pycmdstan',
+      packages=['pycmdstan']
+)
