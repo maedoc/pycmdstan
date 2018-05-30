@@ -15,7 +15,7 @@ install:
   - if [[ ! -f cmdstan-$CSVER/bin/stanc ]]; then curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdstan-$CSVER.tar.gz && tar xzf cmdstan-$CSVER.tar.gz && rm -rf cmdstan-$CSVER.tar.gz && cd cmdstan-$CSVER && make CC=g++ build examples/bernoulli/bernoulli; fi
 
 script:
-  - coverage -m unittest discover
+  - coverage run -m unittest discover
 
 after_success:
   - coveralls
