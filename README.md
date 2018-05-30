@@ -18,7 +18,7 @@ pip install pycmdstan
 
 ## Usage
 
-A brief tour of the API (not all parts are implemented yet):
+An idea of the API (not yet complete)
 ```python
 import pycmdstan.all as stan
 stan.use('~/Downloads/CmdStan-2.17.1')
@@ -50,23 +50,3 @@ running.
 - bind density functions + jupyter widgets to tune dist params interactively
 - auto get cmdstan sources & build
 - model comparison, at least WAIC & PSIS LOO
-
-## Rationale
-
-Why use this instead of PyStan?
-
-### More robust runtime
-
-Building shared object extensions to Python is always fraught with questions like, will it crash in the middle of my session? Using an external executable trades lower interop performance for better stability.
-
-### Simpler deployment
-
-For some projects, CmdStan's toolchain is a simpler deployment, because we're dealing only with a make & a C++ compiler, not the whole Python toolchain as well.  This makes it easier to tune optimization flags freely as well.
-
-### Make-based workflows
-
-Some of our workflows are already in Make, and CmdStan fits in, and we just needed a little extra Python to smooth things over.
-
-### License
-
-Some of our projects require commercial-friendly license in order to get funded.
