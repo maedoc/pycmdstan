@@ -1,5 +1,6 @@
 import os
 import subprocess
+import hashlib
 
 
 class CmdStanNotFound(RuntimeError):
@@ -43,3 +44,36 @@ def compile_model(stan_fname):
     stderr = proc.stderr.read().decode('ascii').strip()
     if stderr:
         print(stderr)
+
+
+class Model:
+    """Stan model.
+    """
+
+    def __init__(self, code: str=None, fname: os.PathLike=None):
+        self.code = code
+        if fname and code is None:
+            with open(fname, 'r') as fd:
+                self.code = fd.read().decode('ascii')
+
+    @property
+    def sha256(self) -> str:
+        sha = hashlib.sha256()
+        sha.update(self.code)
+        return sha.hexdigest()
+
+    def __call__(self, *args, **kwargs) -> 'Run':
+        return Run(model=self, *args, **kwargs)
+
+
+class Run:
+    """Run of Stan model.
+
+    - model
+    - data set
+    - output csv
+    - cmd line args
+    """
+
+    def __init__(self, model, *args, **kwargs):
+        self.model = model
