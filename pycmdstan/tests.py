@@ -74,7 +74,7 @@ class TestPSIS(BaseTestCase):
     model_code = '''
 data { vector[20] x; real mu; }
 parameters { real sig; }
-model { x ~ normal(mu, sig); }
+model { x ~ normal(mu, sig); sig ~ normal(1, 0.01); }
 generated quantities {
     vector[20] log_lik;
     for (i in 1:20) log_lik[i] = normal_lpdf(x[i] | mu, sig);
@@ -99,4 +99,4 @@ generated quantities {
             self.assertIn('log_lik', run.csv)
             loo.append(run['loo'])
         loo = np.array(loo)
-        self.assertEqual(np.argmax(loo), 5)
+        self.assertEqual(np.argmax(loo), 2)
