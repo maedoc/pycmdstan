@@ -96,6 +96,7 @@ generated quantities {
                     'num_warmup': 200,
                     'num_samples': 200
                 })
-            loo.append(run.loo)
+            self.assertIn('log_lik', run.csv)
+            loo.append(run['loo'])
         loo = np.array(loo)
         self.assertEqual(argmax(loo) == 5)
