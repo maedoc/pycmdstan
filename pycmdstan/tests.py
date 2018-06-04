@@ -75,7 +75,7 @@ class TestPSIS(BaseTestCase):
 data { vector[20] x; real mu; }
 parameters { real sig; }
 model { x ~ normal(mu, sig); }
-generate quantities {
+generated quantities {
     vector[20] log_lik;
     for (i in 1:20) log_lik[i] = normal_lpdf(x[i] | mu, sig);
 }
