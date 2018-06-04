@@ -99,4 +99,4 @@ generated quantities {
             self.assertIn('log_lik', run.csv)
             loo.append(run['loo'])
         loo = np.array(loo)
-        self.assertEqual(np.argmax(loo) == 5)
+        self.assertEqual(np.argmax(loo), 5)
