@@ -121,7 +121,7 @@ class Run:
             for key, val in self.method_args.items():
                 cmd.append(f'{key}={val}')
         cmd.extend(['data', f'file={self.data_R_fname}'])
-        cmd.extend(['output', 'refresh=1', f'file={self.output_csv_fname}'])
+        cmd.extend(['output',  f'file={self.output_csv_fname}'])
         logger.warning('starting run with cmd %s', ' '.join(cmd))
         self.proc = subprocess.Popen(cmd)
         if wait:
