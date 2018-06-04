@@ -1,10 +1,16 @@
 variables:
-  tag: gitlab.thevirtualbrain.org/tvb/pycmdstan
+  registry: gitlab.thevirtualbrain.org:5000
+  tag: tvb/pycmdstan
 
 build:
   script:
-    - docker build -t $tag .
+    - docker build -t $registry/$tag .
 
 test:
   script:
-    - docker run --rm $tag python -m unittest discover
+    - docker run --rm $registry/$tag python -m unittest discover
+
+deploy:
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
+    - docker push $registry/$tag
