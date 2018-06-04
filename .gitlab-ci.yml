@@ -3,14 +3,17 @@ variables:
   tag: tvb/pycmdstan
 
 build:
+  stage: build
   script:
     - docker build -t $registry/$tag .
 
 test:
+  stage: test
   script:
     - docker run --rm $registry/$tag python -m unittest discover
 
 deploy:
+  stage: deploy
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
     - docker push $registry/$tag
