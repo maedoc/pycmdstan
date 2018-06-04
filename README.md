@@ -25,22 +25,31 @@ os.environ['CMDSTAN'] = '~/src/cmdstan-2.17.1'
 from pycmdstan import Model, Run
 
 model = Model('''
-
+data { vector[20] x; real mu; }
+parameters { real sig; }
+model { x ~ normal(mu, sig); }
+generate quantities {
+    vector[20] log_lik;
+    for (i in 1:20) log_lik[i] = normal_lpdf(x[i] | mu, sig);
+}
 ''')
-run = Run(
-    model, 'sample', method_args={
-        'num_warmup': 100,
-        'num_samples': 100
-    })
 
-# TODO 
-run.status
-# Iter 200 / 400
+base_data = {'x': np.random.randn(20) + 5.0}
 
-run.plot_trace(nuts=True, extra='K sigma')
-
-run.diagnostics() # rhat, e-fmi, neff/iter
-run.psisloo()
+loo = []
+for mu in np.r_[1.0, 3.0, 5.0, 7.0, 9.0]:
+    data = {'mu': mu}
+    data.update(base_data)
+    run = Run(
+        model,
+        'sample',
+        data,
+        method_args={
+            'num_warmup': 200,
+            'num_samples': 200
+        })
+    loo.append(run.loo)
+loo = np.array(loo)
 ```
 a notable goal is to be able to inspect warmup while it's
 running.

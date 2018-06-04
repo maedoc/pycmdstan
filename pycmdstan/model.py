@@ -72,7 +72,7 @@ class Model:
     def sha256(self) -> str:
         sha = hashlib.sha256()
         sha.update(self.code.encode('ascii'))
-        return sha.hexdigest()
+        return f'sha256{sha.hexdigest()}'
 
     def compile(self, path=None):
         path = path or model_path()
