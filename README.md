@@ -6,8 +6,8 @@ Python interface to CmdStan.
 
 ## Install
 
-Pycmdstan is a pure-Python repo which can be installed from
-the GitHub repo
+Pycmdstan is a pure-Python package which can be installed from
+the Git repo
 ```
 pip install -e git+https://gitlab.thevirtualbrain.org/tvb/pycmdstan
 ```
@@ -18,7 +18,6 @@ pip install pycmdstan
 
 ## Usage
 
-An idea of the API (not yet complete)
 ```python
 import os
 os.environ['CMDSTAN'] = '~/src/cmdstan-2.17.1'
