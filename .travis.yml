@@ -1,22 +1,12 @@
-language: python
-
-env:
-  CSVER=2.17.1
-  CMDSTAN=cmdstan-2.17.1
-
-python:
-  - "3.6"
-
-#cache:
-#  directories:
-#  - cmdstan-2.17.1
+sudo: required
+services:
+ - docker
 
 install:
-  - pip install numpy python-coveralls coverage matplotlib
-  - curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdstan-$CSVER.tar.gz && tar xzf cmdstan-$CSVER.tar.gz && rm -rf cmdstan-$CSVER.tar.gz && cd cmdstan-$CSVER && make CC=g++ build
+  - docker build -t maedoc/pycmdstan .
 
 script:
-  - python -m unittest discover
+  - docker run --rm pycmdstan python -m unittest discover
 
 after_success:
   - coveralls
