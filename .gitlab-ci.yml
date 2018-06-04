@@ -1,6 +1,10 @@
+variables:
+  tag: gitlab.thevirtualbrain.org/tvb/pycmdstan
+
 build:
-  tags:
-  - docker
   script:
-    - docker info
-    - docker build -t pycmdstan .
+    - docker build -t $tag .
+
+test:
+  script:
+    - docker run --rm $tag python -m unittest discover
