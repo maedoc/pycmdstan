@@ -1,6 +1,8 @@
 # pycmdstan
 
-Python interface to CmdStan.
+[![pipeline status](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/badges/master/pipeline.svg)](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/commits/master) [![coverage report](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/badges/master/coverage.svg)](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/commits/master)
+
+Python interface to CmdStan. ![logo](assets/pycmdstan.png)
 
 ## Install
 
