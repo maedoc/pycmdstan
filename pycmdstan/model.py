@@ -90,38 +90,52 @@ class Method(enum.Enum):
 
 
 class Run:
-    """Run of Stan model.
-
-    - model
-    - data set
-    - output csv
-    - cmd line args
-    """
-
     def __init__(self,
                  model: Model,
                  method: Method,
-                 data: dict,
+                 data: dict = None,
                  method_args: dict = None,
                  id: int = None):
         self.model = model
         self.id = id
-        self.method = method
+        self.method = method.value if isinstance(method, Method) else method
         self.method_args = method_args
         self.data = data
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.output_csv_fname = os.path.join(self.tmp_dir.name, 'output.csv')
         self.data_R_fname = os.path.join(self.tmp_dir.name, 'data.R')
-        io.rdump(self.data_R_fname, data)
+        io.rdump(self.data_R_fname, data or {})
         self.start()
 
-    def start(self):
-        cmd = [
-            self.model.exe,
-            self.method.value,
-        ]
+    def start(self, wait=True):
+        if not hasattr(self.model, 'exe'):
+            self.model.compile()
+        self.cmd = cmd = [self.model.exe]
+        if self.id is not None:
+            cmd.append(f'id={self.id}')
+        cmd.append(self.method)
         if self.method_args:
             for key, val in self.method_args.items():
                 cmd.append(f'{key}={val}')
-        logger.debug('starting run with cmd %s', ' '.join(cmd))
-        self.proc = subprocess.Popen()
+        cmd.extend(['data', f'file={self.data_R_fname}'])
+        cmd.extend(['output', 'refresh=1', f'file={self.output_csv_fname}'])
+        logger.warning('starting run with cmd %s', ' '.join(cmd))
+        self.proc = subprocess.Popen(cmd)
+        if wait:
+            self.wait()
+
+    def wait(self):
+        self.proc.wait()
+        if self.proc.returncode != 0:
+            msg = 'Stan model exited with an error (%d)'
+            raise RuntimeError(msg, self.proc.returncode)
+
+    @property
+    def csv(self):
+        if not hasattr(self, '_csv'):
+            self.wait()
+            self._csv = io.parse_csv(self.output_csv_fname)
+        return self._csv
+
+    def __getitem__(self, key):
+        return self.csv[key]

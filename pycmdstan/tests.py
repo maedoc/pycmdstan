@@ -4,7 +4,8 @@ import subprocess
 import tempfile
 import numpy as np
 import numpy.testing
-from . import io, model
+from .io import rdump, rload
+from .model import Model, Run, _find_cmdstan, CmdStanNotFound
 
 
 class BaseTestCase(unittest.TestCase):
@@ -23,8 +24,8 @@ class SimpleIOTests(BaseTestCase):
     def test_write_read(self):
         data = {'int': 3, 'real': 2.3, 'mat': np.random.randn(4, 4)}
         fname = self.tmp_fname('write_read.R')
-        io.rdump(fname, data)
-        data_ = io.rload(fname)
+        rdump(fname, data)
+        data_ = rload(fname)
         for key, val in data.items():
             val_ = data_[key]
             if key in 'int real'.split():
@@ -50,21 +51,20 @@ generated quantities {
         import os
         cmdstan = os.environ['CMDSTAN']
         del os.environ['CMDSTAN']
-        with self.assertRaises(model.CmdStanNotFound):
-            model._find_cmdstan()
+        with self.assertRaises(CmdStanNotFound):
+            _find_cmdstan()
         os.environ['CMDSTAN'] = cmdstan
 
     def test_model1(self):
-        m1 = model.Model(code=self.model1_code)
-        m1.compile()
-        cmd = '{0} sample num_warmup=1 num_samples=1 output file={1}'
-        csv_fname = self.tmp_fname('model1.csv')
-        cmd = cmd.format(m1.exe, csv_fname)
-        subprocess.check_call(cmd.split())
-        csv = io.parse_csv(csv_fname)
+        model = Model(self.model1_code)
+        run = Run(
+            model, 'sample', method_args={
+                'num_warmup': 1,
+                'num_samples': 1
+            })
         for key in 'lp__ x'.split():
-            self.assertIn(key, csv)
-        mat_ = csv['mat'][0]
+            self.assertIn(key, run.csv)
+        mat_ = run['mat'][0]
         mat = (np.r_[:12] + 1.0).reshape((3, 4)).T
         self.assertTrue(np.allclose(mat, mat_))
 
@@ -78,5 +78,4 @@ model { x ~ normal(mu, sig); }
 '''
 
     def test_model(self):
-        m1 = model.Model(code=self.model_code)
-        m1.compile
+        model = Model(code=self.model_code)

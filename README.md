@@ -20,14 +20,20 @@ pip install pycmdstan
 
 An idea of the API (not yet complete)
 ```python
-import pycmdstan.all as stan
-stan.use('~/Downloads/CmdStan-2.17.1')
+import os
+os.environ['CMDSTAN'] = '~/src/cmdstan-2.17.1'
+from pycmdstan import Model, Run
 
-model = stan.Model.from_file('bernoulli.stan')
-model.compile()
+model = Model('''
 
-run = model.sample(data={...})
+''')
+run = Run(
+    model, 'sample', method_args={
+        'num_warmup': 100,
+        'num_samples': 100
+    })
 
+# TODO 
 run.status
 # Iter 200 / 400
 
