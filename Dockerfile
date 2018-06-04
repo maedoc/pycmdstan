@@ -21,5 +21,6 @@ RUN mkdir -p /opt/pycmdstan
 WORKDIR /opt/pycmdstan
 ADD ./ /opt/pycmdstan/
 
+RUN pip install pytest pytest-cov
 
 # fix me

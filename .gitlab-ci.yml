@@ -10,7 +10,7 @@ build:
 test:
   stage: test
   script:
-    - docker run --rm $registry/$tag python -m unittest discover
+    - docker run --rm $registry/$tag pytest --cov=pycmdstan pycmdstan/tests.py
 
 deploy:
   stage: deploy
