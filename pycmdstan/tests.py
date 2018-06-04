@@ -75,7 +75,27 @@ class TestPSIS(BaseTestCase):
 data { vector[20] x; real mu; }
 parameters { real sig; }
 model { x ~ normal(mu, sig); }
+generate quantities {
+    vector[20] log_lik;
+    for (i in 1:20) log_lik[i] = normal_lpdf(x[i] | mu, sig);
+}
 '''
 
     def test_model(self):
         model = Model(code=self.model_code)
+        base_data = {'x': np.random.randn(20) + 5.0}
+        loo = []
+        for mu in np.r_[1.0, 3.0, 5.0, 7.0, 9.0]:
+            data = {'mu': mu}
+            data.update(base_data)
+            run = Run(
+                model,
+                'sample',
+                data,
+                method_args={
+                    'num_warmup': 200,
+                    'num_samples': 200
+                })
+            loo.append(run.loo)
+        loo = np.array(loo)
+        self.assertEqual(argmax(loo) == 5)

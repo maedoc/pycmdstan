@@ -95,9 +95,11 @@ class Run:
                  method: Method,
                  data: dict = None,
                  method_args: dict = None,
-                 id: int = None):
+                 id: int = None,
+                 log_lik: str = 'log_lik'):
         self.model = model
         self.id = id
+        self.log_lik = log_lik
         self.method = method.value if isinstance(method, Method) else method
         self.method_args = method_args
         self.data = data
@@ -135,6 +137,8 @@ class Run:
         if not hasattr(self, '_csv'):
             self.wait()
             self._csv = io.parse_csv(self.output_csv_fname)
+            if self.log_lik in self._csv:
+                self._csv.update(psis.psisloo(-self._csv[self.log_lik]))
         return self._csv
 
     def __getitem__(self, key):
