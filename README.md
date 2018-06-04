@@ -9,7 +9,7 @@ Python interface to CmdStan.
 Pycmdstan is a pure-Python repo which can be installed from
 the GitHub repo
 ```
-pip install -e git+https://github.com/maedoc/pycmdstan
+pip install -e git+https://gitlab.thevirtualbrain.org/tvb/pycmdstan
 ```
 or (eventually) from PyPI
 ```
@@ -48,7 +48,7 @@ for mu in np.r_[1.0, 3.0, 5.0, 7.0, 9.0]:
             'num_warmup': 200,
             'num_samples': 200
         })
-    loo.append(run.loo)
+    loo.append(run['loo'])
 loo = np.array(loo)
 ```
 a notable goal is to be able to inspect warmup while it's
