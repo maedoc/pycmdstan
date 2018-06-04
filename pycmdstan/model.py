@@ -4,7 +4,7 @@ import subprocess
 import hashlib
 import logging
 import tempfile
-from . import io
+from . import io, psis
 
 logger = logging.getLogger('pycmdstan.model')
 
