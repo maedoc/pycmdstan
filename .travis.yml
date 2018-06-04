@@ -12,7 +12,7 @@ python:
 #  - cmdstan-2.17.1
 
 install:
-  - pip install numpy python-coveralls coverage
+  - pip install numpy python-coveralls coverage matplotlib
   - curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdstan-$CSVER.tar.gz && tar xzf cmdstan-$CSVER.tar.gz && rm -rf cmdstan-$CSVER.tar.gz && cd cmdstan-$CSVER && make CC=g++ build
 
 script:

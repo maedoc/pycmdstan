@@ -10,6 +10,7 @@ from . import io, model
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         self.tmp_dir = tempfile.TemporaryDirectory()
+        os.environ['PYCMDSTAN_MODEL_PATH'] = self.tmp_dir.name
 
     def tearDown(self):
         self.tmp_dir.cleanup()
@@ -54,14 +55,11 @@ generated quantities {
         os.environ['CMDSTAN'] = cmdstan
 
     def test_model1(self):
-        fname = self.tmp_fname('model1.stan')
-        with open(fname, 'w') as fd:
-            fd.write(self.model1_code)
-        model.preprocess_model(fname)
-        model.compile_model(fname)
+        m1 = model.Model(code=self.model1_code)
+        m1.compile()
         cmd = '{0} sample num_warmup=1 num_samples=1 output file={1}'
         csv_fname = self.tmp_fname('model1.csv')
-        cmd = cmd.format(fname.split('.stan')[0], csv_fname)
+        cmd = cmd.format(m1.exe, csv_fname)
         subprocess.check_call(cmd.split())
         csv = io.parse_csv(csv_fname)
         for key in 'lp__ x'.split():
@@ -69,3 +67,16 @@ generated quantities {
         mat_ = csv['mat'][0]
         mat = (np.r_[:12] + 1.0).reshape((3, 4)).T
         self.assertTrue(np.allclose(mat, mat_))
+
+
+class TestPSIS(BaseTestCase):
+
+    model_code = '''
+data { vector[20] x; real mu; }
+parameters { real sig; }
+model { x ~ normal(mu, sig); }
+'''
+
+    def test_model(self):
+        m1 = model.Model(code=self.model_code)
+        m1.compile

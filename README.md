@@ -54,6 +54,15 @@ running.
 - [ ] bind density functions + jupyter widgets to tune dist params interactively
 - [ ] auto get cmdstan sources & build
 
+## Dev
+
+Use YAPF to format the code.  The Dockerfile can ease local development, 
+
+```
+docker build -t pycmdstan .
+docker run --rm -it -v `pwd`:/opt/pycmdstan pycmdstan python -m unittest discover
+```
+
 ## Acknowledgements
 
 - PSIS code is by Aki Vehtari & Tuomas Sivula (BSD licensed, [repo here](https://github.com/avehtari/PSIS))
