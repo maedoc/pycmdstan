@@ -6,7 +6,7 @@ install:
   - docker build -t maedoc/pycmdstan .
 
 script:
-  - docker run --rm pycmdstan python -m unittest discover
+  - docker run --rm maedoc/pycmdstan python -m unittest discover
 
 after_success:
   - coveralls
