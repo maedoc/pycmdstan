@@ -6,6 +6,7 @@ import hashlib
 class CmdStanNotFound(RuntimeError):
     pass
 
+
 def _find_cmdstan(path=''):
     if path:
         path = os.path.expanduser(os.path.expandvars(path))
@@ -22,10 +23,7 @@ def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
     stanc_path = os.path.join(_find_cmdstan(), 'bin', 'stanc')
     cmd = [stanc_path, f'--o={hpp_fname}', f'{stan_fname}']
     cwd = os.path.abspath(os.path.dirname(stan_fname))
-    subprocess.check_call(
-        cmd,
-        cwd=cwd
-    )
+    subprocess.check_call(cmd, cwd=cwd)
 
 
 def compile_model(stan_fname):
@@ -50,7 +48,7 @@ class Model:
     """Stan model.
     """
 
-    def __init__(self, code: str=None, fname: os.PathLike=None):
+    def __init__(self, code: str = None, fname: os.PathLike = None):
         self.code = code
         if fname and code is None:
             with open(fname, 'r') as fd:

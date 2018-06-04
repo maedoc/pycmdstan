@@ -32,8 +32,11 @@ run.status
 # Iter 200 / 400
 
 run.plot_trace(nuts=True, extra='K sigma')
+
+run.diagnostics() # rhat, e-fmi, neff/iter
+run.psisloo()
 ```
-a notable goal is to be able to diagnose warmup while it's
+a notable goal is to be able to inspect warmup while it's
 running.
 
 ## Roadmap (wishlist)
@@ -43,10 +46,14 @@ running.
 - [ ] invoke summary or other executables
 - [x] read/write Rdump format (modulo a bug somewhere)
 - [x] read sample & summary CSV format
+- [x] model comparison, at least PSIS LOO
 - [ ] common visualizations (trace, pairs, rhat hist)
-- coordinators `opt_to_init`, `sim_fit` which can sequence model invocations for common cases
-- typical makefile suspects `invoke_stanc`, `compile_model`, etc
-- bind standalone funcs via ctypes
-- bind density functions + jupyter widgets to tune dist params interactively
-- auto get cmdstan sources & build
-- model comparison, at least WAIC & PSIS LOO
+- [ ] coordinators `opt_to_init`, `sim_fit` which can sequence model invocations for common cases
+- [ ] typical makefile suspects `invoke_stanc`, `compile_model`, etc
+- [ ] bind standalone funcs via ctypes
+- [ ] bind density functions + jupyter widgets to tune dist params interactively
+- [ ] auto get cmdstan sources & build
+
+## Acknowledgements
+
+- PSIS code is by Aki Vehtari & Tuomas Sivula (BSD licensed, [repo here](https://github.com/avehtari/PSIS))

@@ -10,12 +10,11 @@ import numpy as np
 
 def _rdump_array(key, val):
     c = 'c(' + ', '.join(map(str, val.T.flat)) + ')'
-    if (val.size,) == val.shape:
+    if (val.size, ) == val.shape:
         return '{key} <- {c}'.format(key=key, c=c)
     else:
         dim = '.Dim = c{0}'.format(val.shape)
-        struct = '{key} <- structure({c}, {dim})'.format(
-            key=key, c=c, dim=dim)
+        struct = '{key} <- structure({c}, {dim})'.format(key=key, c=c, dim=dim)
         return struct
 
 
@@ -69,10 +68,7 @@ def merge_csv_data(*csvs, skip=0):
         for key, val in csv.items():
             val = val[skip:]
             if key in data_:
-                data_[key] = np.concatenate(
-                    (data_[key], val),
-                    axis=0
-                )
+                data_[key] = np.concatenate((data_[key], val), axis=0)
             else:
                 data_[key] = val
     return data_
@@ -88,7 +84,7 @@ def parse_csv(fname, merge=True):
             try:
                 csv.append(parse_csv(_))
             except Exception as e:
-                print('skipping ', fname, e) 
+                print('skipping ', fname, e)
         if merge:
             csv = merge_csv_data(*csv)
         return csv
@@ -120,7 +116,7 @@ def parse_csv(fname, merge=True):
     # TODO array is row maj, how to distinguish matrix v array[,]?
     data_ = {}
     for name, idx in namemap.items():
-        new_shape = (-1,) + maxdims.get(name, ())
+        new_shape = (-1, ) + maxdims.get(name, ())
         data_[name] = data[:, idx].reshape(new_shape)
 
     return data_
@@ -156,8 +152,8 @@ def parse_summary_csv(fname):
 
     for key in [_ for _ in sdat.keys()]:
         if key in sdims:
-            sdat[key] = np.array(sdat[key]).reshape(sdims[key] + (-1,))
-    return scols, sdat 
+            sdat[key] = np.array(sdat[key]).reshape(sdims[key] + (-1, ))
+    return scols, sdat
 
 
 def csv2mode(csv_fname, mode=None):
@@ -184,8 +180,9 @@ def csv2r(csv_fname, r_fname=None, mode=None):
 
 # TODO class to run modules instead of %%bash in ipynb
 
-
 from threading import Thread
+
+
 class FollowCSV:
     def __init__(self, csv_fname):
         self.csv_fname = csv_fname
@@ -193,16 +190,19 @@ class FollowCSV:
         self.thread.start()
         self._line = ''
         self.read = True
+
     @property
     def line(self):
         self.read = True
         return self._line
+
     def _run(self):
         while True:
             try:
                 self._follow()
             except Exception as exc:
                 print(exc)
+
     def _follow(self):
         with open(self.csv_fname, 'r') as fd:
             while True:
