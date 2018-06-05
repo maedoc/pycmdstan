@@ -17,3 +17,11 @@ deploy:
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
     - docker push $registry/$tag
+
+release_pypi:
+  stage: deploy
+  only:
+    - tags
+  script:
+    - docker run --rm $registry/$tag python setup.py sdist bdist_wheel
+    - docker run --rm $registry/$tag twine upload dist/*
