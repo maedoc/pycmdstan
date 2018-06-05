@@ -37,7 +37,7 @@ runs = model.sample(
 	data=dict(mu, **data),
 	chains=4
 )
-assert (runs.N_eff / runs.niter) > 0.2
+assert runs.N_eff_per_iter.min() > 0.2
 assert runs.R_hat.max() < 1.2
 
 data = {'x': np.random.randn(20) + 5.0}

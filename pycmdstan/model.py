@@ -213,8 +213,11 @@ class RunSet:
     @property
     def summary(self):
         if not hasattr(self, '_summary'):
-            self.niter, self._summary = stansummary_csv(
-                [r.output_csv_fname for r in self.runs])
+            run_csvs = []
+            for run in self.runs:
+                run.wait()
+                run_csvs.append(run.output_csv_fname)
+            self.niter, self._summary = stansummary_csv(run_csvs)
         return self._summary
 
     def __getitem__(self, key):
@@ -235,3 +238,7 @@ class RunSet:
     @property
     def N_eff(self):
         return self.flat_field('N_eff')
+
+    @property
+    def N_eff_per_iter(self):
+        return self.N_eff / self.niter
