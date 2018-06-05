@@ -23,5 +23,4 @@ release_pypi:
   only:
     - tags
   script:
-    - docker run --rm $registry/$tag python setup.py sdist bdist_wheel
-    - docker run --rm $registry/$tag twine upload dist/*
+    - docker run --rm -e TWINE_USERNAME=$TWINE_USERNAME -e TWINE_PASSWORD=$TWINE_PASSWORD $registry/$tag bash -c 'python setup.py sdist bdist_wheel && twine upload dist/*'
