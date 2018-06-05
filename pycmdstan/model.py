@@ -72,7 +72,10 @@ def model_path() -> str:
             os.path.expanduser('~'), '.cache', 'pycmdstan')
     if not os.path.exists(os.environ[key]):
         logger.debug(f'creating cache dir {os.environ[key]}')
-        os.makedirs(os.environ[key])
+        try:
+            os.makedirs(os.environ[key])
+        except FileExistsError:
+            pass
     logger.debug(f'have model path {os.environ[key]}')
     return os.environ[key]
 
