@@ -26,31 +26,3 @@ def hist_key(csv_fname, *keys):
         pl.hist(x.reshape((-1, )), bins=int(sqrt(len(x))), **kwargs)
 
     _plot_key(_, csv_fname, *keys)
-
-
-def follow_hmc(csv_fname):
-    from .io import follow_csv
-    from threading import Thread
-    import numpy as np
-    keys = 'lp accept_stat stepsize treedepth n_leapfrog divergent energy'.split(
-    )
-    fig = pl.figure()
-    pl.show()
-    data = []
-
-    line, = pl.plot(data)
-
-    def cb(s):
-        try:
-            status = s.split(',')[:len(keys)]
-            print(status)
-            data.append(float(status[0]))
-            line.set_data(np.r_[:len(data)], np.array(data))
-            pl.draw()
-        except Exception as exc:
-            print(exc)
-
-    # t = Thread(target=follow_csv, args=(csv_fname, cb))
-    # t.start()
-    # return t
-    follow_csv(csv_fname, cb)

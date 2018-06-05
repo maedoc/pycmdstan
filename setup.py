@@ -31,5 +31,6 @@ setuptools.setup(
     author_email='marmaduke.woodman@univ-amu.fr',
     url='https://gitlab.thevirtualbrain.org/tvb/pycmdstan',
     packages=['pycmdstan'],
+    install_requires='numpy filelock'.split(),
     classifiers=_classifiers.strip().split('\n'),
 )

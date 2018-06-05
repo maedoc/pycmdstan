@@ -4,7 +4,7 @@ I/O functions for working with CmdStan executables.
 """
 
 import os
-import subprocess
+import threading
 import numpy as np
 
 
@@ -125,12 +125,17 @@ def parse_csv(fname, merge=True):
 def parse_summary_csv(fname):
     skeys = []
     svals = []
+    niter = -1
     with open(fname, 'r') as fd:
         scols = fd.readline().strip().split(',')
         for line in fd.readlines():
+            print(line)
             if '"' not in line:
                 continue
             if line.startswith('#'):
+                niter_match = re.search(r'(\d+) iterations saved', line)
+                if niter_match:
+                    niter = int(niter_match.group(1))
                 break
             _, k, v = line.split('"')
             skeys.append(k)
@@ -153,48 +158,28 @@ def parse_summary_csv(fname):
     for key in [_ for _ in sdat.keys()]:
         if key in sdims:
             sdat[key] = np.array(sdat[key]).reshape(sdims[key] + (-1, ))
-    return scols, sdat
+
+    recs = {}
+    dt = [(k, 'f8') for k in scols[1:]]
+    for key, val in sdat.items():
+        recs[key] = np.rec.array(val, dtype=dt)
+
+    return niter, recs
 
 
-def csv2mode(csv_fname, mode=None):
-    csv = parse_csv(csv_fname)
-    data = {}
-    for key, val in csv.items():
-        if key.endswith('__'):
-            continue
-        if mode is None:
-            val_ = val[0]
-        elif mode == 'mean':
-            val_ = val.mean(axis=0)
-        elif mode[0] == 'p':
-            val_ = np.percentile(val, int(mode[1:]), axis=0)
-        data[key] = val_
-    return data
+class OnlineCSVParser:
 
+    # TODO following lines + col labels is sufficient to alloc arrays AOT
+    #     num_samples = 1000 (Default)
+    #     num_warmup = 1000 (Default)
+    #     save_warmup = 0 (Default)
 
-def csv2r(csv_fname, r_fname=None, mode=None):
-    data = csv2mode(csv_fname, mode=mode)
-    r_fname = r_fname or csv_fname + '.R'
-    rdump(r_fname, data)
-
-
-# TODO class to run modules instead of %%bash in ipynb
-
-from threading import Thread
-
-
-class FollowCSV:
     def __init__(self, csv_fname):
         self.csv_fname = csv_fname
         self.thread = Thread(target=self._run)
-        self.thread.start()
         self._line = ''
         self.read = True
-
-    @property
-    def line(self):
-        self.read = True
-        return self._line
+        self.thread.start()
 
     def _run(self):
         while True:
@@ -208,7 +193,10 @@ class FollowCSV:
             while True:
                 line = fd.readline()
                 if line:
-                    self._line = line
-                    self.read = False
+                    self.parse_line(line)
                 else:
-                    time.sleep(0.2)
+                    # TODO adapt to avg time btw samples
+                    time.sleep(0.01)
+
+    def parse_line(self, line):
+        pass

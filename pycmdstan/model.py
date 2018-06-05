@@ -35,12 +35,12 @@ def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
     subprocess.check_call(cmd, cwd=cwd)
 
 
-def compile_model(stan_fname):
+def compile_model(stan_fname, opt_lvl):
     path = os.path.abspath(os.path.dirname(stan_fname))
     name = stan_fname[:-5]
     target = os.path.join(path, name)
     proc = subprocess.Popen(
-        ['make', target],
+        ['make', f'O={opt_lvl}', target],
         cwd=_find_cmdstan(),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -53,11 +53,27 @@ def compile_model(stan_fname):
         print(stderr)
 
 
+def stansummary_csv(csv_in):
+    if not isinstance(csv_in, list):
+        csv_in = [csv_in]
+    exe = os.path.join(_find_cmdstan(), 'bin', 'stansummary')
+    with tempfile.TemporaryDirectory() as td:
+        csv_out = os.path.join(td, 'summary.csv')
+        cmd = [exe, f'--csv_file={csv_out}'] + csv_in
+        subprocess.check_call(cmd, stdout=subprocess.DEVNULL)
+        summary = io.parse_summary_csv(csv_out)
+    return summary
+
+
 def model_path() -> str:
     key = 'PYCMDSTAN_MODEL_PATH'
-    home = os.path.expanduser('~')
     if key not in os.environ:
-        os.environ[key] = os.path.join(home, '.cache', 'pycmdstan')
+        os.environ[key] = os.path.join(
+            os.path.expanduser('~'), '.cache', 'pycmdstan')
+    if not os.path.exists(os.environ[key]):
+        logger.debug(f'creating cache dir {os.environ[key]}')
+        os.makedirs(os.environ[key])
+    logger.debug(f'have model path {os.environ[key]}')
     return os.environ[key]
 
 
@@ -65,13 +81,12 @@ class Model:
     """Stan model.
     """
 
-    def __init__(self, code: str = None, fname: os.PathLike = None):
+    def __init__(self, code: str = None, fname: os.PathLike = None, opt_lvl=3):
         self.code = code
+        self.opt_lvl = opt_lvl
         if fname and code is None:
             with open(fname, 'r') as fd:
                 self.code = fd.read().decode('ascii')
-        # TODO replace w/ file lock
-        self._compile_lock = threading.Lock()
 
     @property
     def sha256(self) -> str:
@@ -82,16 +97,39 @@ class Model:
     def _compile(self, stan_fname):
         with open(stan_fname, 'w') as fd:
             fd.write(self.code)
-        compile_model(stan_fname)
+        compile_model(stan_fname, opt_lvl=self.opt_lvl)
 
     def compile(self, path=None):
         self.path = path or model_path()
         self.stan_fname = os.path.join(self.path, f'{self.sha256}.stan')
-        self.exe, _ = stan_fname.rsplit('.stan')
+        self.exe, _ = self.stan_fname.rsplit('.stan')
         self._lock = filelock.FileLock(f'{self.exe}.lock')
-        with self.lock:
+        with self._lock:
             if not os.path.exists(self.exe):
-                self._compile(stan_fname)
+                self._compile(self.stan_fname)
+
+    def sample(self, **kwargs):
+        return self.run(method='sample', **kwargs)
+
+    def variational(self, **kwargs):
+        return self.run(method='variational', **kwargs)
+
+    def optimize(self, **kwargs):
+        return self.run(method='optimize', **kwargs)
+
+    def run(self, method, chains=1, wait=False, **kwargs):
+        rng = np.random.RandomState()
+        rng.seed(kwargs.pop('id', 0))
+        runs = [
+            Run(model=self,
+                method=method,
+                id=rng.random_integers(99999),
+                **kwargs) for _ in range(chains)
+        ]
+        if len(runs) == 1:
+            return runs[0]
+        else:
+            return RunSet(*runs)
 
 
 class Method(enum.Enum):
@@ -105,10 +143,11 @@ class Run:
                  model: Model,
                  method: Method,
                  data: dict = None,
-                 method_args: dict = None,
                  id: int = None,
                  log_lik: str = 'log_lik',
-                 start: bool = True):
+                 start: bool = True,
+                 wait: bool = False,
+                 **method_args):
         self.model = model
         self.id = id
         self.log_lik = log_lik
@@ -117,9 +156,13 @@ class Run:
         self.data = data
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.output_csv_fname = os.path.join(self.tmp_dir.name, 'output.csv')
-        self.data_R_fname = os.path.join(self.tmp_dir.name, 'data.R')
-        io.rdump(self.data_R_fname, data or {})
-        self.start()
+        if data:
+            self.data_R_fname = os.path.join(self.tmp_dir.name, 'data.R')
+            io.rdump(self.data_R_fname, data)
+        self.start(wait=wait)
+
+    def __del__(self):
+        self.tmp_dir.cleanup()
 
     def start(self, wait=True):
         if not hasattr(self.model, 'exe'):
@@ -131,9 +174,10 @@ class Run:
         if self.method_args:
             for key, val in self.method_args.items():
                 cmd.append(f'{key}={val}')
-        cmd.extend(['data', f'file={self.data_R_fname}'])
+        if self.data:
+            cmd.extend(['data', f'file={self.data_R_fname}'])
         cmd.extend(['output', f'file={self.output_csv_fname}'])
-        logger.warning('starting run with cmd %s', ' '.join(cmd))
+        logger.info('starting run with cmd %s', ' '.join(cmd))
         self.proc = subprocess.Popen(cmd)
         if wait:
             self.wait()
@@ -157,3 +201,34 @@ class Run:
 
     def __getitem__(self, key):
         return self.csv[key]
+
+
+class RunSet:
+    def __init__(self, *runs):
+        self.runs = runs
+
+    @property
+    def summary(self):
+        if not hasattr(self, '_summary'):
+            self.niter, self._summary = stansummary_csv(
+                [r.output_csv_fname for r in self.runs])
+        return self._summary
+
+    def __getitem__(self, key):
+        return self.summary[key]
+
+    def flat_field(self, field, only_params=True):
+        vals = []
+        for key, val in self.summary.items():
+            if only_params and key.endswith('__'):
+                continue
+            vals.append(val[field].reshape((-1, )))
+        return np.hstack(vals)
+
+    @property
+    def R_hats(self):
+        return self.flat_field('R_hat')
+
+    @property
+    def N_eff(self):
+        return self.flat_field('N_eff')

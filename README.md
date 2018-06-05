@@ -1,6 +1,6 @@
 # pycmdstan
 
-[![pipeline status](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/badges/master/pipeline.svg)](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/commits/master) [![coverage report](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/badges/master/coverage.svg)](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/commits/master)
+[![pipeline status](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/badges/master/pipeline.svg)](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/commits/master) [![coverage report](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/badges/master/coverage.svg)](https://gitlab.thevirtualbrain.org/tvb/pycmdstan/commits/master) [![PyPI package version](https://img.shields.io/pypi/v/pycmdstan.svg)](https://pypi.org/project/pycmdstan/)
 
 Python interface to CmdStan.
 
@@ -33,25 +33,22 @@ generate quantities {
 }
 ''')
 
-base_data = {'x': np.random.randn(20) + 5.0}
+runs = model.sample(
+	data=dict(mu, **data),
+	chains=4
+)
+assert (runs.N_eff / runs.niter) > 0.2
+assert runs.R_hat.max() < 1.2
 
+data = {'x': np.random.randn(20) + 5.0}
 loo = []
-for mu in np.r_[1.0, 3.0, 5.0, 7.0, 9.0]:
-    data = {'mu': mu}
-    data.update(base_data)
-    run = Run(
-        model,
-        'sample',
-        data,
-        method_args={
-            'num_warmup': 200,
-            'num_samples': 200
-        })
+mus = np.r_[1.0, 3.0, 5.0, 7.0, 9.0]
+for mu in mus:
+    run = model.sample(
+        data=dict(mu=mu, **data), num_warmup=200, num_samples=200)
     loo.append(run['loo'])
-loo = np.array(loo)
+assert mus[np.argmin(loo)] == 5.0
 ```
-a notable goal is to be able to inspect warmup while it's
-running.
 
 ## Roadmap (wishlist)
 
