@@ -50,28 +50,14 @@ for mu in mus:
 assert mus[np.argmin(loo)] == 5.0
 ```
 
-## Roadmap (wishlist)
+## Contributing
 
-- [x] preprocess & compile Stan model with support for `#include`s
-- [ ] run model w/ multiple chains
-- [ ] invoke summary or other executables
-- [x] read/write Rdump format (modulo a bug somewhere)
-- [x] read sample & summary CSV format
-- [x] model comparison, at least PSIS LOO
-- [ ] common visualizations (trace, pairs, rhat hist)
-- [ ] coordinators `opt_to_init`, `sim_fit` which can sequence model invocations for common cases
-- [ ] typical makefile suspects `invoke_stanc`, `compile_model`, etc
-- [ ] bind standalone funcs via ctypes
-- [ ] bind density functions + jupyter widgets to tune dist params interactively
-- [ ] auto get cmdstan sources & build
-
-## Dev
-
+Contributions are welcome, please start in the issue tracker. 
 Use YAPF to format the code.  The Dockerfile can ease local development, 
 
 ```
 docker build -t pycmdstan .
-docker run --rm -it -v `pwd`:/opt/pycmdstan pycmdstan python -m unittest discover
+docker run --rm -it pycmdstan pytest -n4 pycmdstan/tests.py
 ```
 
 ## Acknowledgements
