@@ -23,7 +23,7 @@ Topic :: Scientific/Engineering :: Information Analysis
 
 setuptools.setup(
     name='pycmdstan',
-    version='0.3',
+    version='0.4.1',
     description='Python interface to CmdStan',
     long_description=readme_contents(),
     long_description_content_type="text/markdown",
