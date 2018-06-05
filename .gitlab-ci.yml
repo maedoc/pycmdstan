@@ -20,7 +20,5 @@ deploy:
 
 release_pypi:
   stage: deploy
-  only:
-    - tags
   script:
-    - docker run --rm -e TWINE_USERNAME=$TWINE_USERNAME -e TWINE_PASSWORD=$TWINE_PASSWORD $registry/$tag bash -c 'python setup.py sdist bdist_wheel && twine upload dist/*'
+    - docker run --rm $registry/$tag bash -c "python setup.py sdist bdist_wheel && twine upload -u $TWINE_USERNAME2 -p $TWINE_PASSWORD2 dist/*"
