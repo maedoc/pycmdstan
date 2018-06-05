@@ -4,6 +4,8 @@ import subprocess
 import hashlib
 import logging
 import tempfile
+import threading
+import filelock
 import numpy as np
 from . import io, psis
 
@@ -68,6 +70,8 @@ class Model:
         if fname and code is None:
             with open(fname, 'r') as fd:
                 self.code = fd.read().decode('ascii')
+        # TODO replace w/ file lock
+        self._compile_lock = threading.Lock()
 
     @property
     def sha256(self) -> str:
@@ -75,13 +79,19 @@ class Model:
         sha.update(self.code.encode('ascii'))
         return f'sha256{sha.hexdigest()}'
 
-    def compile(self, path=None):
-        path = path or model_path()
-        stan_fname = os.path.join(path, f'{self.sha256}.stan')
+    def _compile(self, stan_fname):
         with open(stan_fname, 'w') as fd:
             fd.write(self.code)
         compile_model(stan_fname)
+
+    def compile(self, path=None):
+        self.path = path or model_path()
+        self.stan_fname = os.path.join(self.path, f'{self.sha256}.stan')
         self.exe, _ = stan_fname.rsplit('.stan')
+        self._lock = filelock.FileLock(f'{self.exe}.lock')
+        with self.lock:
+            if not os.path.exists(self.exe):
+                self._compile(stan_fname)
 
 
 class Method(enum.Enum):
@@ -97,7 +107,8 @@ class Run:
                  data: dict = None,
                  method_args: dict = None,
                  id: int = None,
-                 log_lik: str = 'log_lik'):
+                 log_lik: str = 'log_lik',
+                 start: bool = True):
         self.model = model
         self.id = id
         self.log_lik = log_lik
@@ -121,13 +132,15 @@ class Run:
             for key, val in self.method_args.items():
                 cmd.append(f'{key}={val}')
         cmd.extend(['data', f'file={self.data_R_fname}'])
-        cmd.extend(['output',  f'file={self.output_csv_fname}'])
+        cmd.extend(['output', f'file={self.output_csv_fname}'])
         logger.warning('starting run with cmd %s', ' '.join(cmd))
         self.proc = subprocess.Popen(cmd)
         if wait:
             self.wait()
 
     def wait(self):
+        if not hasattr(self, 'proc'):
+            self.start(wait=False)
         self.proc.wait()
         if self.proc.returncode != 0:
             msg = 'Stan model exited with an error (%d)'

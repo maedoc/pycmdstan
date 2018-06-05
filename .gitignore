@@ -7,3 +7,5 @@ build
 .ipynb_checkpoints
 travis.yml
 .coverage
+.pytest_cache
+dist
