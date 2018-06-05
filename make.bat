@@ -1,13 +1,4 @@
 @echo off
-REM docker build -t pycmdstan .
-REM 
-
-REM 
-REM docker run --rm -it -v %here%:/opt/pycmdstan pycmdstan ^
-REM  pytest --cov=pycmdstan -n 8 pycmdstan/tests.py
-REM 
-REM docker run --rm -it -v %here%:/opt/pycmdstan ^
-REM  python
 
 set cmd=%1
 if "%cmd%" == "" set cmd="test" 
