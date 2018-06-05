@@ -7,13 +7,13 @@ Python interface to CmdStan.
 ## Install
 
 Pycmdstan is a pure-Python package which can be installed from
-the Git repo
+PyPI
+```
+pip install --upgrade pycmdstan
+```
+or from sources
 ```
 pip install -e git+https://gitlab.thevirtualbrain.org/tvb/pycmdstan
-```
-or (eventually) from PyPI
-```
-pip install pycmdstan
 ```
 
 ## Usage

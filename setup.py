@@ -9,6 +9,18 @@ def readme_contents() -> str:
     return src
 
 
+_classifiers = """
+Programming Language :: Python :: 3
+License :: OSI Approved :: Apache Software License
+Operating System :: OS Independent
+Development Status :: 4 - Beta
+Intended Audience :: Science/Research
+Natural Language :: English
+Programming Language :: Other
+Programming Language :: C++
+Topic :: Scientific/Engineering :: Information Analysis
+"""
+
 setuptools.setup(
     name='pycmdstan',
     version='0.1',
@@ -19,9 +31,5 @@ setuptools.setup(
     author_email='marmaduke.woodman@univ-amu.fr',
     url='https://gitlab.thevirtualbrain.org/tvb/pycmdstan',
     packages=['pycmdstan'],
-    classifiers=(
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache Software License",
-        "Operating System :: OS Independent",
-    ),
+    classifiers=_classifiers.strip().split('\n'),
 )
