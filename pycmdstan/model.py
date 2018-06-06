@@ -245,10 +245,10 @@ class Run:
         if self.stdout:
             logger.info('\n'.join(self.stdout))
         if self.stderr:
-            logger.warning('\n'.join(self.stdout))
+            logger.warning('\n'.join(self.stderr))
         if self.proc.returncode != 0:
-            msg = 'Stan model exited with an error (%d)'
-            raise RuntimeError(msg, self.proc.returncode)
+            msg = 'Stan model exited with an error (%d, %s, %s)'
+            raise RuntimeError(msg, self.proc.returncode, '\n'.join(self.stderr), '\n'.join(self.stdout))
 
     @property
     def csv(self):
