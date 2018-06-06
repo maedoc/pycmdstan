@@ -8,15 +8,18 @@ pycmdstan.io
 
 .. automodule:: pycmdstan.io
    :members:
+   :undoc-members:
 
 pycmdstan.model
-------------
+---------------
 
 .. automodule:: pycmdstan.model
    :members:
+   :undoc-members:
 
 pycmdstan.viz
-------------
+-------------
 
 .. automodule:: pycmdstan.viz
    :members:
+   :undoc-members:

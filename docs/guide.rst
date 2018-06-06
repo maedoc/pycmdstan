@@ -8,18 +8,22 @@ Install
 
 Pycmdstan is a pure-Python package which can be installed from
 PyPI
+
 .. code-block:: bash
+
 	pip install --upgrade pycmdstan
 
 or from sources
 
 .. code-block:: bash
+
 	pip install -e git+https://gitlab.thevirtualbrain.org/tvb/pycmdstan
 
 Basics
 ------
 
 .. code-block:: python
+
 	import os
 	os.environ['CMDSTAN'] = '~/src/cmdstan-2.17.1'
 	from pycmdstan import Model, Run
@@ -54,15 +58,18 @@ CmdStan's command line arguments are structured as a tree, so while child parame
 method argument can be passed directly,
 
 .. code-block:: python
+
    model.sample(num_samples=500)
 
 equivalent to
 .. code-block:: bash
+
 	./$model sample num_samples=500
 
 A more complex case with nested parameters looks like
 
 .. code-block:: bash
+
 	./$model id=$i \
 	    sample save_warmup=1 num_warmup=200 num_samples=200 \
 	        adapt \
@@ -73,21 +80,22 @@ A more complex case with nested parameters looks like
 
 Pycmdstan doesn't do anything clever (yet), so full set of subarguments need to be
 passed as equivalent strings
-```python
-model.sample(
-	save_warmup=1,
-	num_warmup=200,
-	num_samples=200,
-	adapt_='delta=0.8',
-	algorithm='hmc engine=nuts max_depth=12'
-)
-```
+.. code-block:: python
+
+	model.sample(
+		save_warmup=1,
+		num_warmup=200,
+		num_samples=200,
+		adapt_='delta=0.8',
+		algorithm='hmc engine=nuts max_depth=12')
+
 Here, the `_` postfix on `adapt_` means `adapt` doesn't take a value, but subarguments. In doubt,
 the command line used to call the model is available as an attribute of the `Run` instance,
-```python
-run = model.sample(...)
-print(run.cmd)
-```
+
+.. code-block:: python
+
+	run = model.sample(...)
+	print(run.cmd)
 
 Plots
 -----
