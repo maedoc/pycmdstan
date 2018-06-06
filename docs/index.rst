@@ -13,8 +13,7 @@ Stan statistics software.
    :maxdepth: 2
    :caption: Contents:
 
-   intro
-   tutorial
+   guide
    api
 
 
