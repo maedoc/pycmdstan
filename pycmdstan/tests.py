@@ -200,6 +200,7 @@ class TestPlotNutsTrace(TestMetrics):
 class TestPlotParCoord(BaseTestCase):
     @savefig
     def test_plot_parallel_coordinates(self):
+        from pylab import randn, sin, abs
         nsamp = 100
         csv = dict(
             x=randn(nsamp, 3, 3) * randn(3, 3) + sin(r_[:9] / 4).reshape(
