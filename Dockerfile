@@ -24,4 +24,6 @@ ADD ./ /opt/pycmdstan/
 
 RUN pip install --upgrade setuptools wheel twine
 
+ENV MPLBACKEND=agg
+ENV PYTHONDONTWRITEBYTECODE=1
 # fix me

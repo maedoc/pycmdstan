@@ -10,7 +10,11 @@ build:
 test:
   stage: test
   script:
-    - docker run --rm $registry/$tag pytest --cov=pycmdstan -n 10 pycmdstan/tests.py
+    - docker run --rm $registry/$tag pytest --cov=pycmdstan --cov-report=html -n 10 pycmdstan/tests.py
+  artifacts:
+    paths:
+    - htmlcov/
+    - "*.png"
 
 deploy:
   stage: deploy

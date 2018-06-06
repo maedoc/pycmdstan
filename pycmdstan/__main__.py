@@ -3,6 +3,11 @@
 
 import argparse
 
+
+def main():
+    pass
+
+
 # compile model
 # dump npz/pkl/h5 to Rdump
 # run multiple chains

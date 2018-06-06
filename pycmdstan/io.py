@@ -4,6 +4,7 @@ I/O functions for working with CmdStan executables.
 """
 
 import os
+import re
 import threading
 import numpy as np
 
@@ -66,6 +67,9 @@ def merge_csv_data(*csvs, skip=0):
     data_ = {}
     for csv in csvs:
         for key, val in csv.items():
+            # XXX do better
+            if key in 'loo loos ks'.split():
+                continue
             val = val[skip:]
             if key in data_:
                 data_[key] = np.concatenate((data_[key], val), axis=0)
@@ -129,14 +133,13 @@ def parse_summary_csv(fname):
     with open(fname, 'r') as fd:
         scols = fd.readline().strip().split(',')
         for line in fd.readlines():
-            print(line)
-            if '"' not in line:
-                continue
-            if line.startswith('#'):
+            if 'iterations' in line:
                 niter_match = re.search(r'(\d+) iterations saved', line)
                 if niter_match:
                     niter = int(niter_match.group(1))
-                break
+                continue
+            if line.startswith('#') or '"' not in line:
+                continue
             _, k, v = line.split('"')
             skeys.append(k)
             svals.append(np.array([float(_) for _ in v.split(',')[1:]]))
@@ -167,36 +170,36 @@ def parse_summary_csv(fname):
     return niter, recs
 
 
-class OnlineCSVParser:
+# class OnlineCSVParser:
 
-    # TODO following lines + col labels is sufficient to alloc arrays AOT
-    #     num_samples = 1000 (Default)
-    #     num_warmup = 1000 (Default)
-    #     save_warmup = 0 (Default)
+#     # TODO following lines + col labels is sufficient to alloc arrays AOT
+#     #     num_samples = 1000 (Default)
+#     #     num_warmup = 1000 (Default)
+#     #     save_warmup = 0 (Default)
 
-    def __init__(self, csv_fname):
-        self.csv_fname = csv_fname
-        self.thread = Thread(target=self._run)
-        self._line = ''
-        self.read = True
-        self.thread.start()
+#     def __init__(self, csv_fname):
+#         self.csv_fname = csv_fname
+#         self.thread = Thread(target=self._run)
+#         self._line = ''
+#         self.read = True
+#         self.thread.start()
 
-    def _run(self):
-        while True:
-            try:
-                self._follow()
-            except Exception as exc:
-                print(exc)
+#     def _run(self):
+#         while True:
+#             try:
+#                 self._follow()
+#             except Exception as exc:
+#                 print(exc)
 
-    def _follow(self):
-        with open(self.csv_fname, 'r') as fd:
-            while True:
-                line = fd.readline()
-                if line:
-                    self.parse_line(line)
-                else:
-                    # TODO adapt to avg time btw samples
-                    time.sleep(0.01)
+#     def _follow(self):
+#         with open(self.csv_fname, 'r') as fd:
+#             while True:
+#                 line = fd.readline()
+#                 if line:
+#                     self.parse_line(line)
+#                 else:
+#                     # TODO adapt to avg time btw samples
+#                     time.sleep(0.01)
 
-    def parse_line(self, line):
-        pass
+#     def parse_line(self, line):
+#         pass

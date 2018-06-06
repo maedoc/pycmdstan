@@ -36,6 +36,7 @@ def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
 
 
 def compile_model(stan_fname, opt_lvl):
+    preprocess_model(stan_fname, overwrite=True)
     path = os.path.abspath(os.path.dirname(stan_fname))
     name = stan_fname[:-5]
     target = os.path.join(path, name)
@@ -89,7 +90,7 @@ class Model:
         self.opt_lvl = opt_lvl
         if fname and code is None:
             with open(fname, 'r') as fd:
-                self.code = fd.read().decode('ascii')
+                self.code = fd.read()
 
     @property
     def sha256(self) -> str:
@@ -148,6 +149,7 @@ class Run:
                  data: dict = None,
                  id: int = None,
                  log_lik: str = 'log_lik',
+                 start: bool = True,
                  wait: bool = False,
                  **method_args):
         self.model = model
@@ -161,10 +163,26 @@ class Run:
         if data:
             self.data_R_fname = os.path.join(self.tmp_dir.name, 'data.R')
             io.rdump(self.data_R_fname, data)
-        self.start(wait=wait)
+        if start:
+            self.start(wait=wait)
 
     def __del__(self):
         self.tmp_dir.cleanup()
+
+    def _complex_args(self, cmd, args):
+        for key, val in args.items():
+            # num_warmup=3
+            sep = '='
+            # adapt_='delta=0.8' -> adapt delta=0.8
+            if key.endswith('_'):
+                val = f'{key[:-1]} {val}'
+                sep = key = ''
+            more = []
+            if isinstance(val, str):
+                # "adapt delta=0.8" -> ['adapt', 'delta=0.8']
+                val, *more = val.split(' ')
+            cmd.append(f"{key}{sep}{val}")
+            cmd.extend(more)
 
     @property
     def cmd(self):
@@ -176,21 +194,18 @@ class Run:
         if self.id is not None:
             cmd.append(f'id={self.id}')
         cmd.append(self.method)
-        if self.method_args:
-            for key, val in self.method_args.items():
-                sep = '='
-                if key.endswith('_'):  # e.g. adapt delta=0.8
-                    sep = ' '
-                    key = key[:-1]
-                cmd.append(f"{key}{sep}{val}")
+        self._complex_args(cmd, self.method_args)
         if self.data:
             cmd.extend(['data', f'file={self.data_R_fname}'])
         cmd.extend(['output', f'file={self.output_csv_fname}'])
         return cmd
 
     def start(self, wait=True):
-        logger.info('starting run with cmd %s', ' '.join(self.cmd))
-        self.proc = subprocess.Popen(self.cmd)
+        if hasattr(self, 'proc'):
+            raise RuntimeError('run has already started')
+        logger.info('starting run with cmd %r', self.cmd)
+        self.proc = subprocess.Popen(
+            self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if wait:
             self.wait()
 
@@ -198,6 +213,8 @@ class Run:
         if not hasattr(self, 'proc'):
             self.start(wait=False)
         self.proc.wait()
+        self.stdout = self.proc.stdout.readlines()
+        self.stderr = self.proc.stderr.readlines()
         if self.proc.returncode != 0:
             msg = 'Stan model exited with an error (%d)'
             raise RuntimeError(msg, self.proc.returncode)
@@ -245,9 +262,23 @@ class RunSet:
         return self.flat_field('R_hat')
 
     @property
-    def N_eff(self):
-        return self.flat_field('N_eff')
+    def N_Eff(self):
+        return self.flat_field('N_Eff')
 
     @property
-    def N_eff_per_iter(self):
-        return self.N_eff / self.niter
+    def N_Eff_per_iter(self):
+        return self.N_Eff / self.niter
+
+    @property
+    def csv(self):
+        if not hasattr(self, '_csv'):
+            self._csv = io.merge_csv_data(*[r.csv for r in self.runs])
+            try:
+                log_lik = -self._csv[self.runs[0].log_lik]
+                self._csv.update(psis.psisloo(log_lik))
+            except (AttributeError, KeyError):
+                pass
+        return self._csv
+
+    def __iter__(self):
+        return iter(self.runs)
