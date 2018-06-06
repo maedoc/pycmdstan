@@ -1,5 +1,6 @@
 from .io import parse_csv
 from math import sqrt
+import numpy as np
 import pylab as pl
 
 
@@ -68,10 +69,8 @@ def pairs(csv, keys, skip=0):
 
 
 def parallel_coordinates(csv, keys, marker='ko-'):
-    flats = {
-        k: v.reshape((csv['lp__'].shape[0], -1))
-        for k, v in csv.items() if k in keys
-    }
+    nsamp = csv['lp__'].shape[0]
+    flats = {k: v.reshape((nsamp, -1)) for k, v in csv.items() if k in keys}
     key_i = 0
     mats = []
     key_idx = []
@@ -83,7 +82,7 @@ def parallel_coordinates(csv, keys, marker='ko-'):
         key_i += v.shape[1]
     mats = np.hstack(mats)
     mats = ((mats - mats.min(axis=0)) / mats.ptp(axis=0)).T
-    plot(mats, 'ko-', alpha=1 / np.sqrt(nsamp))
-    xticks(key_idx, key_val)
-    yticks([])
-    grid(1)
+    pl.plot(mats, 'ko-', alpha=1 / np.sqrt(nsamp))
+    pl.xticks(key_idx, key_val)
+    pl.yticks([])
+    pl.grid(1)

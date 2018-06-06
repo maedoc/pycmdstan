@@ -26,4 +26,6 @@ RUN pip install --upgrade setuptools wheel twine
 
 ENV MPLBACKEND=agg
 ENV PYTHONDONTWRITEBYTECODE=1
+
+RUN pip install --upgrade sphinx
 # fix me
