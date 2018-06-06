@@ -9,3 +9,5 @@ travis.yml
 .coverage
 .pytest_cache
 dist
+htmlcov
+*.png

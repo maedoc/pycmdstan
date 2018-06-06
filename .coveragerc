@@ -1,0 +1,3 @@
+[run]
+omit =
+	pycmdstan/psis.py
