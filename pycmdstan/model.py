@@ -242,6 +242,10 @@ class Run:
         self.proc.wait()
         self.stdout = self.proc.stdout.readlines()
         self.stderr = self.proc.stderr.readlines()
+        if self.stdout:
+            logger.info('\n'.join(self.stdout))
+        if self.stderr:
+            logger.warning('\n'.join(self.stdout))
         if self.proc.returncode != 0:
             msg = 'Stan model exited with an error (%d)'
             raise RuntimeError(msg, self.proc.returncode)
