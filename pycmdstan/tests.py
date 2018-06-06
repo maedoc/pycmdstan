@@ -11,7 +11,7 @@ import matplotlib
 matplotlib.use('Agg')
 from .io import rdump, rload, parse_csv
 from .model import Model, Run, _find_cmdstan, CmdStanNotFound
-from .viz import plot_key, hist_key, trace_nuts, pairs
+from .viz import plot_key, hist_key, trace_nuts, pairs, parallel_coordinates
 from .__main__ import main
 
 logging.basicConfig(level=logging.INFO)
@@ -195,6 +195,21 @@ class TestPlotNutsTrace(TestMetrics):
         with self.assertRaises(RuntimeError):
             run.start()
         trace_nuts(run.csv, 'sig', skip=100)
+
+
+class TestPlotParCoord(BaseTestCase):
+    @savefig
+    def test_plot_parallel_coordinates(self):
+        nsamp = 100
+        csv = dict(
+            x=randn(nsamp, 3, 3) * randn(3, 3) + sin(r_[:9] / 4).reshape(
+                (3, 3)),
+            y=randn(nsamp, 2)**2,
+            z=abs(randn(nsamp))**0.5,
+            z1=randn(nsamp)**3,
+            lp__=randn(nsamp))
+        keys = 'x y z'.split()
+        parallel_coordinates(csv, keys)
 
 
 class TestStanError(TestMetrics):

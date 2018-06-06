@@ -65,3 +65,25 @@ def pairs(csv, keys, skip=0):
                 pl.title(key_j)
             if j == 0:
                 pl.ylabel(key_i)
+
+
+def parallel_coordinates(csv, keys, marker='ko-'):
+    flats = {
+        k: v.reshape((csv['lp__'].shape[0], -1))
+        for k, v in csv.items() if k in keys
+    }
+    key_i = 0
+    mats = []
+    key_idx = []
+    key_val = []
+    for k, v in flats.items():
+        mats.append(v)
+        key_idx.append(key_i)
+        key_val.append(k)
+        key_i += v.shape[1]
+    mats = np.hstack(mats)
+    mats = ((mats - mats.min(axis=0)) / mats.ptp(axis=0)).T
+    plot(mats, 'ko-', alpha=1 / np.sqrt(nsamp))
+    xticks(key_idx, key_val)
+    yticks([])
+    grid(1)
