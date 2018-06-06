@@ -6,6 +6,8 @@ build:
   stage: build
   script:
     - docker build -t $registry/$tag .
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
+    - docker push $registry/$tag
 
 test:
   stage: test
@@ -17,12 +19,6 @@ test:
     paths:
     - htmlcov/
     - "*.png"
-
-deploy:
-  stage: deploy
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
-    - docker push $registry/$tag
 
 release_pypi:
   stage: deploy
