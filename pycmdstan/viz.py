@@ -12,10 +12,14 @@ def _plot_key(fn, csv, *keys):
 
 
 def plot_key(csv, *keys):
+    """Create a trace plot for keys (parameter names) in sample set.
+    """
     _plot_key(pl.plot, csv, *keys)
 
 
 def hist_key(csv, *keys):
+    """Create a histogram for keys (parameter names) in sample set.
+    """
     def _(x, **kwargs):
         pl.hist(x.reshape((-1, )), bins=int(sqrt(len(x))), **kwargs)
 
@@ -50,6 +54,8 @@ def trace_nuts(csv, extras='', skip=0, n_col=4):
 
 
 def pairs(csv, keys, skip=0):
+    """Create a pairs plot for keys in the given dataset.
+    """
     import pylab as pl
     n = len(keys)
     if isinstance(csv, dict):
@@ -69,6 +75,8 @@ def pairs(csv, keys, skip=0):
 
 
 def parallel_coordinates(csv, keys, marker='ko-'):
+    """Create a parallel coordinates plot for keys in the given dataset.
+    """
     nsamp = csv['lp__'].shape[0]
     flats = {k: v.reshape((nsamp, -1)) for k, v in csv.items() if k in keys}
     key_i = 0

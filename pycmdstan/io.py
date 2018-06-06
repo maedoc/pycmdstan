@@ -64,6 +64,8 @@ def rload(fname):
 
 
 def merge_csv_data(*csvs, skip=0):
+    """Merge multiple CSV dicts into a single dict.
+    """
     data_ = {}
     for csv in csvs:
         for key, val in csv.items():
@@ -79,6 +81,8 @@ def merge_csv_data(*csvs, skip=0):
 
 
 def parse_csv(fname, merge=True):
+    """Parse samples from a Stan output CSV file.
+    """
     if '*' in fname:
         import glob
         return parse_csv(glob.glob(fname), merge=merge)
@@ -127,6 +131,8 @@ def parse_csv(fname, merge=True):
 
 
 def parse_summary_csv(fname):
+    """Parse CSV output of the stansummary program.
+    """
     skeys = []
     svals = []
     niter = -1
