@@ -103,3 +103,13 @@ Plots
 -----
 
 (todo)
+
+Trace plots
+^^^^^^^^^^^
+
+.. image:: https://gitlab.thevirtualbrain.org/tvb/pycmdstan/-/jobs/artifacts/master/raw/test_trace_nuts.png?job=test
+
+Parallel coordinates plot
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. image:: https://gitlab.thevirtualbrain.org/tvb/pycmdstan/-/jobs/artifacts/master/raw/test_plot_parallel_coordinates.png?job=test
