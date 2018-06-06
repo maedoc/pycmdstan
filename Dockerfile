@@ -1,11 +1,14 @@
 FROM python:3.6-stretch
 
 ENV CSVER=2.17.1
-ENV CMDSTAN=cmdstan-2.17.1
+ENV CMDSTAN=/opt/cmdstan-$CSVER
 ENV CXX=clang++-3.9
+ENV MPLBACKEND=agg
+ENV PYTHONDONTWRITEBYTECODE=1
 
 RUN apt-get update && apt-get install -y clang-3.9
-RUN pip install numpy coverage pytest pytest-cov pytest-xdist matplotlib filelock
+RUN pip install numpy coverage pytest pytest-cov pytest-xdist matplotlib filelock sphinx
+RUN pip install --upgrade setuptools wheel twine
 
 WORKDIR /opt/
 RUN curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdstan-$CSVER.tar.gz \
@@ -14,18 +17,6 @@ RUN curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdst
  && cd cmdstan-$CSVER \
  && make -j8 build examples/bernoulli/bernoulli
 
-ENV CMDSTAN=/opt/cmdstan-2.17.1
-
-RUN make -C $CMDSTAN 
-
 RUN mkdir -p /opt/pycmdstan
 WORKDIR /opt/pycmdstan
 ADD ./ /opt/pycmdstan/
-
-RUN pip install --upgrade setuptools wheel twine
-
-ENV MPLBACKEND=agg
-ENV PYTHONDONTWRITEBYTECODE=1
-
-RUN pip install --upgrade sphinx
-# fix me
