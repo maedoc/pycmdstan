@@ -10,7 +10,8 @@ build:
 test:
   stage: test
   script:
-    - docker run --rm -v $(pwd):/opt/pycmdstan $registry/$tag pytest --cov=pycmdstan --cov-report=term --cov-report=html -n 10 pycmdstan/tests.py
+    - ls
+    - docker run --rm -v $(pwd):/opt/pycmdstan $registry/$tag bash -c "ls && pytest --cov=pycmdstan --cov-report=term --cov-report=html -n 10 pycmdstan/tests.py"
   artifacts:
     paths:
     - htmlcov/
