@@ -91,7 +91,7 @@ passed as equivalent strings
 		adapt_='delta=0.8',
 		algorithm='hmc engine=nuts max_depth=12')
 
-Here, the `_` postfix on `adapt_` means `adapt` doesn't take a value, but subarguments. In doubt,
+Here, the :code:`_` postfix on :code:`adapt_` means :code:`adapt` doesn't take a value, but subarguments. In doubt,
 the command line used to call the model is available as an attribute of the `Run` instance,
 
 .. code-block:: python
