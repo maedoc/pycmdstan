@@ -240,8 +240,8 @@ class Run:
         if not hasattr(self, 'proc'):
             self.start(wait=False)
         self.proc.wait()
-        self.stdout = self.proc.stdout.readlines()
-        self.stderr = self.proc.stderr.readlines()
+        self.stdout = [l.decode('ascii') for l in self.proc.stdout.readlines()]
+        self.stderr = [l.decode('ascii') for l in self.proc.stderr.readlines()]
         if self.stdout:
             logger.info('\n'.join(self.stdout))
         if self.stderr:
