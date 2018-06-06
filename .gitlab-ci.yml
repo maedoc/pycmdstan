@@ -9,9 +9,10 @@ build:
 
 test:
   stage: test
+  image: $registry/$tag
   script:
     - ls
-    - docker run --rm -v $(pwd):/opt/pycmdstan $registry/$tag bash -c "ls && pytest --cov=pycmdstan --cov-report=term --cov-report=html -n 10 pycmdstan/tests.py"
+    - pytest --cov=pycmdstan --cov-report=term --cov-report=html -n 10 pycmdstan/tests.py
   artifacts:
     paths:
     - htmlcov/
@@ -25,7 +26,9 @@ deploy:
 
 release_pypi:
   stage: deploy
+  image: $registry/$tag
   only:
     - tags
   script:
-    - docker run --rm $registry/$tag bash -c "python setup.py sdist bdist_wheel && twine upload -u $TWINE_USERNAME2 -p $TWINE_PASSWORD2 dist/*"
+    - python setup.py sdist bdist_wheel
+    - twine upload -u $TWINE_USERNAME2 -p $TWINE_PASSWORD2 dist/*
