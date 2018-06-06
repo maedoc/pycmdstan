@@ -11,7 +11,7 @@ if "%cmd%" == "run" (
 ) else if "%cmd%" == "runit" (
 	docker run --rm -it -v %here%:/opt/pycmdstan pycmdstan %2 %3 %4 %5 %6 %7 %8 %9
 ) else if "%cmd%" == "test" (
-	make run pytest --cov=pycmdstan -n 8 pycmdstan/tests.py
+	make run pytest --cov=pycmdstan --cov-report=html -n 8 pycmdstan/tests.py
 ) else if "%cmd%" == "build" (
 	docker build -t pycmdstan .
 ) else if "%cmd%" == "pkg" (

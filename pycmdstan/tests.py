@@ -1,3 +1,4 @@
+import re
 import os
 import unittest
 import subprocess
@@ -8,7 +9,7 @@ import numpy.testing
 from .io import rdump, rload
 from .model import Model, Run, _find_cmdstan, CmdStanNotFound
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class BaseTestCase(unittest.TestCase):
@@ -76,6 +77,8 @@ generated quantities {
 
 
 class TestMetrics(BaseTestCase):
+    # cache model on test machine and cover code path for ~/.cache/pycmdstan/...
+    use_tmp = False
 
     model_code = '''
 data { vector[20] x; real mu; }
@@ -103,10 +106,21 @@ generated quantities {
 
 
 class TestSummary(TestMetrics):
-    # cover code path for ~/.cache/pycmdstan/...
-    use_tmp = False
-
     def test_summary(self):
         data = dict(mu=5.0, **self.data)
         runs = self.model.sample(data=data, chains=4, **self.args)
         self.assertLess(runs.R_hats.max(), 1.2)
+
+
+class TestComplexArgs(TestMetrics):
+    def test_complex_args(self):
+        run = self.model.sample(
+            start=False,
+            data=dict(mu=5.0, **self.data),
+            num_samples=1,
+            num_warmup=1,
+            adapt_='delta=0.8',
+            algorithm='hmc engine=nuts max_depth=12')
+        cmd = ' '.join(run.cmd)
+        self.assertIsNotNone(re.search('adapt delta', cmd))
+        self.assertIsNotNone(re.search('algorithm=hmc engine=nuts', cmd))

@@ -49,6 +49,42 @@ for mu in mus:
     loo.append(run['loo'])
 assert mus[np.argmin(loo)] == 5.0
 ```
+CmdStan's command line arguments are structured as a tree, so while child parameters of the 
+method argument can be passed directly,
+```python
+model.sample(num_samples=500)
+```
+equivalent to
+```bash
+./$model sample num_samples=500
+```
+A more complex case with nested parameters looks like
+```bash
+./$model id=$i \
+    sample save_warmup=1 num_warmup=200 num_samples=200 \
+        adapt \
+            delta=0.8 \
+        algorithm=hmc \
+            engine=nuts \
+                max_depth=12
+```
+Pycmdstan doesn't do anything clever (yet), so full set of subarguments need to be
+passed as equivalent strings
+```python
+model.sample(
+	save_warmup=1,
+	num_warmup=200,
+	num_samples=200,
+	adapt_='delta=0.8',
+	algorithm='hmc engine=nuts max_depth=12'
+)
+```
+Here, the `_` postfix on `adapt_` means `adapt` doesn't take a value, but subarguments. In doubt,
+the command line used to call the model is available as an attribute of the `Run` instance,
+```python
+run = model.sample(...)
+print(run.cmd)
+```
 
 ## Contributing
 

@@ -148,7 +148,6 @@ class Run:
                  data: dict = None,
                  id: int = None,
                  log_lik: str = 'log_lik',
-                 start: bool = True,
                  wait: bool = False,
                  **method_args):
         self.model = model
@@ -167,21 +166,31 @@ class Run:
     def __del__(self):
         self.tmp_dir.cleanup()
 
-    def start(self, wait=True):
+    @property
+    def cmd(self):
+        if hasattr(self, '_cmd'):
+            return self._cmd
         if not hasattr(self.model, 'exe'):
             self.model.compile()
-        self.cmd = cmd = [self.model.exe]
+        self._cmd = cmd = [self.model.exe]
         if self.id is not None:
             cmd.append(f'id={self.id}')
         cmd.append(self.method)
         if self.method_args:
             for key, val in self.method_args.items():
-                cmd.append(f'{key}={val}')
+                sep = '='
+                if key.endswith('_'):  # e.g. adapt delta=0.8
+                    sep = ' '
+                    key = key[:-1]
+                cmd.append(f"{key}{sep}{val}")
         if self.data:
             cmd.extend(['data', f'file={self.data_R_fname}'])
         cmd.extend(['output', f'file={self.output_csv_fname}'])
-        logger.info('starting run with cmd %s', ' '.join(cmd))
-        self.proc = subprocess.Popen(cmd)
+        return cmd
+
+    def start(self, wait=True):
+        logger.info('starting run with cmd %s', ' '.join(self.cmd))
+        self.proc = subprocess.Popen(self.cmd)
         if wait:
             self.wait()
 
