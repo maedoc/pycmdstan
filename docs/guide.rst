@@ -62,6 +62,7 @@ method argument can be passed directly,
    model.sample(num_samples=500)
 
 equivalent to
+
 .. code-block:: bash
 
 	./$model sample num_samples=500
@@ -80,6 +81,7 @@ A more complex case with nested parameters looks like
 
 Pycmdstan doesn't do anything clever (yet), so full set of subarguments need to be
 passed as equivalent strings
+
 .. code-block:: python
 
 	model.sample(
