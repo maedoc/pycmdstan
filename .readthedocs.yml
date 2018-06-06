@@ -3,3 +3,7 @@ build:
 
 python:
     version: 3.6
+    extra_requirements:
+      - numpy
+      - matplotlib
+      - filelock
