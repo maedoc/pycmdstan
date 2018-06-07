@@ -273,17 +273,22 @@ class RunSet:
         """Create a new RunSet from a sequence of Runs.
         """
         self.runs = runs
+        self._summary_thread = threading.Thread(target=self._build_summary)
+        self._summary_thread.start()
+
+    def _build_summary(self):
+        run_csvs = []
+        for run in self.runs:
+            run.wait()
+            run_csvs.append(run.output_csv_fname)
+        self.niter, self._summary = stansummary_csv(run_csvs)
 
     @property
     def summary(self):
         """Retrive summary results for this RunSet.
         """
         if not hasattr(self, '_summary'):
-            run_csvs = []
-            for run in self.runs:
-                run.wait()
-                run_csvs.append(run.output_csv_fname)
-            self.niter, self._summary = stansummary_csv(run_csvs)
+            self._build_summary()
         return self._summary
 
     def __getitem__(self, key):
