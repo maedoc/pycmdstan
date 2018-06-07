@@ -168,8 +168,8 @@ class Run:
                  data: dict = None,
                  id: int = None,
                  log_lik: str = 'log_lik',
-                 start: bool = True,
-                 wait: bool = False,
+                 start: bool = False,
+                 wait: bool = True,
                  **method_args):
         """Create a new run of the given model, for a given method.
         """
@@ -242,10 +242,7 @@ class Run:
         self.proc.wait()
         self.stdout = [l.decode('ascii') for l in self.proc.stdout.readlines()]
         self.stderr = [l.decode('ascii') for l in self.proc.stderr.readlines()]
-        if self.stdout:
-            logger.info('\n'.join(self.stdout))
-        if self.stderr:
-            logger.warning('\n'.join(self.stderr))
+        logger.warning('\n'.join(self.stderr))
         if self.proc.returncode != 0:
             msg = 'Stan model exited with an error (%d, %s, %s)'
             raise RuntimeError(msg, self.proc.returncode, '\n'.join(self.stderr), '\n'.join(self.stdout))
