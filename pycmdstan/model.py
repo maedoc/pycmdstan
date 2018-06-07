@@ -168,8 +168,8 @@ class Run:
                  data: dict = None,
                  id: int = None,
                  log_lik: str = 'log_lik',
-                 start: bool = False,
-                 wait: bool = True,
+                 start: bool = True,
+                 wait: bool = False,
                  **method_args):
         """Create a new run of the given model, for a given method.
         """
