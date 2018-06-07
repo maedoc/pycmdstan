@@ -255,7 +255,8 @@ class Run:
             self.wait()
             self._csv = io.parse_csv(self.output_csv_fname)
             if self.log_lik in self._csv:
-                self._csv.update(psis.psisloo(-self._csv[self.log_lik]))
+                log_lik = self._csv[self.log_lik].reshape((self._csv['lp__'].size, -1))
+                self._csv.update(psis.psisloo(-log_lik))
         return self._csv
 
     def __getitem__(self, key):
@@ -325,8 +326,8 @@ class RunSet:
         if not hasattr(self, '_csv'):
             self._csv = io.merge_csv_data(*[r.csv for r in self.runs])
             try:
-                log_lik = -self._csv[self.runs[0].log_lik]
-                self._csv.update(psis.psisloo(log_lik))
+                log_lik = self._csv[self.runs[0].log_lik].reshape((self._csv['lp__'].size, -1))
+                self._csv.update(psis.psisloo(-log_lik))
             except (AttributeError, KeyError):
                 pass
         return self._csv
