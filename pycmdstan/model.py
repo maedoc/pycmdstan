@@ -256,7 +256,8 @@ class Run:
             self._csv = io.parse_csv(self.output_csv_fname)
             if self.log_lik in self._csv:
                 log_lik = self._csv[self.log_lik].reshape((self._csv['lp__'].size, -1))
-                self._csv.update(psis.psisloo(-log_lik))
+                if log_lik.shape[0] > 1:
+                    self._csv.update(psis.psisloo(-log_lik))
         return self._csv
 
     def __getitem__(self, key):
