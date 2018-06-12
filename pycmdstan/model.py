@@ -34,7 +34,10 @@ def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
     stanc_path = os.path.join(_find_cmdstan(), 'bin', 'stanc')
     cmd = [stanc_path, f'--o={hpp_fname}', f'{stan_fname}']
     cwd = os.path.abspath(os.path.dirname(stan_fname))
-    subprocess.check_call(cmd, cwd=cwd)
+    out = subprocess.check_output(cmd, cwd=cwd, stderr=subprocess.STDOUT)
+    out = out.decode('ascii').strip()
+    if out:
+        print(out)
 
 
 def compile_model(stan_fname, opt_lvl=3):
