@@ -27,6 +27,24 @@ def _find_cmdstan(path=''):
     return path
 
 
+def _run(cmd, cwd=None):
+    proc = subprocess.Popen(
+        cmd,
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    stdout = proc.stdout.read().decode('ascii').strip()
+    if stdout:
+        logger.info(stdout)
+    stderr = proc.stderr.read().decode('ascii').strip()
+    if stderr:
+        logger.warning(stderr)
+    if proc.returncode != 0:
+        msg = f'{cmd} returned {proc.returncode}\n{stdout}\n{stderr}'
+        raise RuntimeError(msg)
+
+
 def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
     """Invoke stanc on the given Stan model file.
     """
@@ -34,10 +52,7 @@ def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
     stanc_path = os.path.join(_find_cmdstan(), 'bin', 'stanc')
     cmd = [stanc_path, f'--o={hpp_fname}', f'{stan_fname}']
     cwd = os.path.abspath(os.path.dirname(stan_fname))
-    out = subprocess.check_output(cmd, cwd=cwd, stderr=subprocess.STDOUT)
-    out = out.decode('ascii').strip()
-    if out:
-        print(out)
+    _run(cmd, cwd)
 
 
 def compile_model(stan_fname, opt_lvl=3):
@@ -47,18 +62,8 @@ def compile_model(stan_fname, opt_lvl=3):
     path = os.path.abspath(os.path.dirname(stan_fname))
     name = stan_fname[:-5]
     target = os.path.join(path, name)
-    proc = subprocess.Popen(
-        ['make', f'O={opt_lvl}', target],
-        cwd=_find_cmdstan(),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    stdout = proc.stdout.read().decode('ascii').strip()
-    if stdout:
-        print(stdout)
-    stderr = proc.stderr.read().decode('ascii').strip()
-    if stderr:
-        print(stderr)
+    cmd = ['make', f'O={opt_lvl}', target]
+    _run(cmd, _find_cmdstan())
 
 
 def stansummary_csv(csv_in):
