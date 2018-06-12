@@ -27,7 +27,7 @@ def _find_cmdstan(path=''):
     return path
 
 
-def _run(cmd, cwd=None):
+def _run(cmd, cwd=None, check=True):
     proc = subprocess.Popen(
         cmd,
         cwd=cwd,
@@ -40,9 +40,10 @@ def _run(cmd, cwd=None):
     stderr = proc.stderr.read().decode('ascii').strip()
     if stderr:
         logger.warning(stderr)
-    if proc.returncode != 0:
-        msg = f'{cmd} returned {proc.returncode}\n{stdout}\n{stderr}'
-        raise RuntimeError(msg)
+    if check:
+        if proc.returncode != 0:
+            msg = f'{cmd} returned {proc.returncode}\n{stdout}\n{stderr}'
+            raise RuntimeError(msg)
 
 
 def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
@@ -52,7 +53,7 @@ def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
     stanc_path = os.path.join(_find_cmdstan(), 'bin', 'stanc')
     cmd = [stanc_path, f'--o={hpp_fname}', f'{stan_fname}']
     cwd = os.path.abspath(os.path.dirname(stan_fname))
-    _run(cmd, cwd)
+    _run(cmd, cwd=cwd, check=False)
 
 
 def compile_model(stan_fname, opt_lvl=3):
