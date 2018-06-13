@@ -36,20 +36,18 @@ def _run(cmd, cwd=None, check=True):
     )
     stdout = proc.stdout.read().decode('ascii').strip()
     if stdout:
-        logger.info(stdout)
+        print(stdout)
     stderr = proc.stderr.read().decode('ascii').strip()
     if stderr:
-        logger.warning(stderr)
-    if check:
-        if proc.returncode != 0:
-            msg = f'{cmd} returned {proc.returncode}\n{stdout}\n{stderr}'
-            raise RuntimeError(msg)
+        print(stderr)
 
 
 def preprocess_model(stan_fname, hpp_fname=None, overwrite=False):
     """Invoke stanc on the given Stan model file.
     """
     hpp_fname = hpp_fname or stan_fname.replace('.stan', '.hpp')
+    if os.path.exists(hpp_fname):
+        return
     stanc_path = os.path.join(_find_cmdstan(), 'bin', 'stanc')
     cmd = [stanc_path, f'--o={hpp_fname}', f'{stan_fname}']
     cwd = os.path.abspath(os.path.dirname(stan_fname))
@@ -249,12 +247,15 @@ class Run:
         if not hasattr(self, 'proc'):
             self.start(wait=False)
         self.proc.wait()
-        self.stdout = [l.decode('ascii') for l in self.proc.stdout.readlines()]
-        self.stderr = [l.decode('ascii') for l in self.proc.stderr.readlines()]
-        logger.warning('\n'.join(self.stderr))
+        self.stdout = self.proc.stdout.read().decode('ascii')
+        if self.stdout:
+            print(self.stdout)
+        self.stderr = self.proc.stderr.read().decode('ascii')
+        if self.stderr:
+            print(self.stderr)
         if self.proc.returncode != 0:
-            msg = 'Stan model exited with an error (%d, %s, %s)'
-            raise RuntimeError(msg, self.proc.returncode, '\n'.join(self.stderr), '\n'.join(self.stdout))
+            msg = 'Stan model exited with error %d\n%s\n%s'
+            raise RuntimeError(msg, self.proc.returncode, self.stderr, self.stdout)
 
     @property
     def csv(self):
