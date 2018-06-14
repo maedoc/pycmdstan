@@ -117,7 +117,7 @@ class Model:
         """
         sha = hashlib.sha256()
         sha.update(self.code.encode('ascii'))
-        return f'sha256{sha.hexdigest()}'
+        return f'model-{sha.hexdigest()[:8]}'
 
     def _compile(self, stan_fname):
         with open(stan_fname, 'w') as fd:
@@ -227,7 +227,7 @@ class Run:
         self._complex_args(cmd, self.method_args)
         if self.data:
             cmd.extend(['data', f'file={self.data_R_fname}'])
-        cmd.extend(['output', f'file={self.output_csv_fname}'])
+        cmd.extend(['output', f'file={self.output_csv_fname}', 'refresh=1'])
         return cmd
 
     def start(self, wait=True):
@@ -238,8 +238,16 @@ class Run:
         logger.info('starting run with cmd %r', self.cmd)
         self.proc = subprocess.Popen(
             self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # self._update_progress_thread = threading.Thread(
+        #     target=self._update_progress_thread_run
+        # )
+        #self._update_progress_thread.start()
         if wait:
             self.wait()
+
+    def _update_progress_thread_run(self):
+        while True:
+            self.progress = self.proc.stdout.readline()
 
     def wait(self):
         """Wait for run to complete.
@@ -255,7 +263,8 @@ class Run:
             print(self.stderr)
         if self.proc.returncode != 0:
             msg = 'Stan model exited with error %d\n%s\n%s'
-            raise RuntimeError(msg, self.proc.returncode, self.stderr, self.stdout)
+            msg %= self.proc.returncode, self.stderr, self.stdout
+            raise RuntimeError(msg)
 
     @property
     def csv(self):

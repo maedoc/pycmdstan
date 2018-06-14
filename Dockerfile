@@ -19,4 +19,5 @@ RUN curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdst
 
 RUN mkdir -p /opt/pycmdstan
 WORKDIR /opt/pycmdstan
+RUN pip install scipy
 ADD ./ /opt/pycmdstan/

@@ -13,6 +13,9 @@ del os
 from importlib import reload
 from . import io, model, viz, psis
 [reload(_) for _ in (io, model, viz, psis)]
+def reload():
+    import importlib, pycmdstan
+    importlib.reload(pycmdstan)
 
 from .io import *
 from .model import *
