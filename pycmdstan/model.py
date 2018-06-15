@@ -107,16 +107,19 @@ class Model:
         """
         self.code = code
         self.opt_lvl = opt_lvl
+        self.fname = fname
         if fname and code is None:
             with open(fname, 'r') as fd:
                 self.code = fd.read()
 
     @property
-    def sha256(self) -> str:
+    def model_id(self) -> str:
         """SHA256 checksum of model code.
         """
         sha = hashlib.sha256()
         sha.update(self.code.encode('ascii'))
+        #if self.fname:
+        #    os.path.basename()
         return f'model-{sha.hexdigest()[:8]}'
 
     def _compile(self, stan_fname):
@@ -128,7 +131,7 @@ class Model:
         """Compile the model.
         """
         self.path = path or model_path()
-        self.stan_fname = os.path.join(self.path, f'{self.sha256}.stan')
+        self.stan_fname = os.path.join(self.path, f'{self.model_id}.stan')
         self.exe, _ = self.stan_fname.rsplit('.stan')
         self._lock = filelock.FileLock(f'{self.exe}.lock')
         with self._lock:
@@ -236,7 +239,8 @@ class Run:
         """
         if hasattr(self, 'proc'):
             raise RuntimeError('run has already started')
-        logger.info('starting run with cmd %r', self.cmd)
+        logger.info('starting %s', ' '.join(self.cmd))
+        logger.debug('starting %r', self.cmd)
         self._output_fd = open(self.output_fname, 'w')
         self.proc = subprocess.Popen(
             self.cmd, stdout=self._output_fd, stderr=subprocess.STDOUT)
@@ -262,8 +266,7 @@ class Run:
         self._output_fd.close()
         with open(self.output_fname, 'r') as fd:
             self.stdout = fd.read()
-        if self.stdout:
-            print(self.stdout)
+        logger.info('finished %s', ' '.join(self.cmd))
         if self.proc.returncode != 0:
             msg = 'Stan model exited with error %d\n%s'
             msg %= self.proc.returncode, self.stdout
