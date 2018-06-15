@@ -12,3 +12,4 @@ dist
 htmlcov
 *.png
 docs/_build
+.idea
