@@ -259,8 +259,9 @@ class Run:
         if not hasattr(self, 'proc'):
             self.start(wait=False)
         self._wait_loop()
-        self.stdout = self._output_fd.read()
         self._output_fd.close()
+        with open(self.output_fname, 'r') as fd:
+            self.stdout = fd.read()
         if self.stdout:
             print(self.stdout)
         if self.proc.returncode != 0:
