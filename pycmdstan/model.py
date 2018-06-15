@@ -188,6 +188,7 @@ class Run:
         self.data = data
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.output_csv_fname = os.path.join(self.tmp_dir.name, 'output.csv')
+        self.output_fname = os.path.join(self.tmp_dir.name, 'output.txt')
         if data:
             self.data_R_fname = os.path.join(self.tmp_dir.name, 'data.R')
             io.rdump(self.data_R_fname, data)
@@ -236,34 +237,35 @@ class Run:
         if hasattr(self, 'proc'):
             raise RuntimeError('run has already started')
         logger.info('starting run with cmd %r', self.cmd)
+        self._output_fd = open(self.output_fname, 'w')
         self.proc = subprocess.Popen(
-            self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # self._update_progress_thread = threading.Thread(
-        #     target=self._update_progress_thread_run
-        # )
-        #self._update_progress_thread.start()
+            self.cmd, stdout=self._output_fd, stderr=subprocess.STDOUT)
         if wait:
             self.wait()
 
-    def _update_progress_thread_run(self):
+    def _wait_loop(self):
         while True:
-            self.progress = self.proc.stdout.readline()
+            try:
+                self.proc.wait(1)
+                break
+            except subprocess.TimeoutExpired:
+                continue
+            except KeyboardInterrupt:
+                break
 
     def wait(self):
         """Wait for run to complete.
         """
         if not hasattr(self, 'proc'):
             self.start(wait=False)
-        self.proc.wait()
-        self.stdout = self.proc.stdout.read().decode('ascii')
+        self._wait_loop()
+        self.stdout = self._output_fd.read()
+        self._output_fd.close()
         if self.stdout:
             print(self.stdout)
-        self.stderr = self.proc.stderr.read().decode('ascii')
-        if self.stderr:
-            print(self.stderr)
         if self.proc.returncode != 0:
-            msg = 'Stan model exited with error %d\n%s\n%s'
-            msg %= self.proc.returncode, self.stderr, self.stdout
+            msg = 'Stan model exited with error %d\n%s'
+            msg %= self.proc.returncode, self.stdout
             raise RuntimeError(msg)
 
     @property
@@ -280,7 +282,7 @@ class Run:
         return self._csv
 
     def __getitem__(self, key):
-        """Retrive a parameter from output.
+        """Retrieve a parameter from output.
         """
         return self.csv[key]
 
