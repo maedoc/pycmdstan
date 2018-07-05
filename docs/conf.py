@@ -28,7 +28,7 @@ author = 'Marmaduke Woodman'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = 'v0.8'
+release = 'v0.9'
 
 # -- General configuration ---------------------------------------------------
 
