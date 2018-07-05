@@ -180,6 +180,7 @@ class Run:
                  log_lik: str = 'log_lik',
                  start: bool = True,
                  wait: bool = False,
+                 tmp_dir: str = '',
                  **method_args):
         """Create a new run of the given model, for a given method.
         """
@@ -189,7 +190,7 @@ class Run:
         self.method = method
         self.method_args = method_args
         self.data = data
-        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.tmp_dir = tmp_dir or tempfile.TemporaryDirectory()
         self.output_csv_fname = os.path.join(self.tmp_dir.name, 'output.csv')
         self.output_fname = os.path.join(self.tmp_dir.name, 'output.txt')
         if data:
