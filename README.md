@@ -8,6 +8,7 @@ Python interface to CmdStan.
 After installing,  `pip install -U pycmdstan`, a contrived example would be
 ```python
 from pycmdstan import Model, Run
+from numpy.random import randn
 
 model = Model('''
 data { vector[20] x; real mu; }
@@ -15,7 +16,7 @@ parameters { real sig; }
 model { x ~ normal(mu, sig); }
 ''')
 
-assert model.sample(data={'mu': 5.0, x: randn(20)}, chains=4).R_hat.max() < 1.2
+assert model.sample(data={'mu': 5.0, 'x': randn(20)}, chains=4).R_hats.max() < 1.2
 ```
 See the [docs](https://pycmdstan.readthedocs.io/en/latest/) for more.
 
