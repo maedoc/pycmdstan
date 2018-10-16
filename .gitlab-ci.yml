@@ -7,9 +7,9 @@ build:
   tags:
     - docker
   script:
-    - docker build -t $registry/$tag .
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
-    - docker push $registry/$tag
+    - sudo docker build -t $registry/$tag .
+    - sudo docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
+    - sudo docker push $registry/$tag
 
 test:
   stage: test
